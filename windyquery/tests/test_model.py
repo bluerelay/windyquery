@@ -11,7 +11,7 @@ def test_table_name(model):
     assert User.table == 'users'
     class AdminUser(Model):
         pass
-    assert SearchTemplateSchedule.table == 'admin_users'
+    assert AdminUser.table == 'admin_users'
     class Custom(Model):
         table = 'my_custom'
     assert Custom.table == 'my_custom'
