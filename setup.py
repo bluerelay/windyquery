@@ -13,6 +13,10 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/bluerelay/windyquery",
     packages=setuptools.find_packages(),
+    install_requires=[
+        'asyncpg',
+        'rx',
+    ],
     classifiers=[
         "Programming Language :: Python :: 3.6",
         "License :: OSI Approved :: MIT License",
