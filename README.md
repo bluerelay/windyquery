@@ -41,7 +41,7 @@ asyncio.get_event_loop().run_until_complete(schema.connect('db_name', {
     'password': 'db_user_password'
 }, default=True, min_size=1, max_size=1))
 
-# switch connections between deferent databases
+# switch connections between different databases
 db.connection('other_db_name')
 
 # the default connection can also be dynamically changed
@@ -155,6 +155,7 @@ users = await db.table('users').select('data->>name AS name').where("data->addre
 ```
 
 ### Raw sql examples
+Raw sql is needed for creating complex queries.
 ```python
 # select_raw
 await db.table('users').select_raw(
@@ -177,8 +178,10 @@ async with db.conn_pools['db_name'].acquire() as connection:
 
 ### Model
 To use Model, a **primary key** is required by the underneath table.
-A custom Model can be created by subclassing the windyquery.Model calss.
-By default, it links the model name (CamelCase) to the table name (snake_case)s with trailing a 's'.
+By subclassing windyquery.Model calss, you create a model for your table.
+By default, the table name should be in the "snake_case" (my_orders),
+and the model name is in CamelCase (MyOrder).
+Please also note table name has an extra 's' at the end unless it already ends with 's'.
 ```python
 # setup connection
 from windyquery import DB
@@ -228,8 +231,8 @@ users = await User.where("email", 'test@example.com')
 user = User(email='test@example.com', password='password')
 user = await user.save()
 
-# create a new record if not found
-user = await User.where('id', 10).where('name', 'not_such_name').first_or_new()
+# create a new record if "Tom Smith " is not found
+user = await User.where('first_name', 'Tom').where('last_name', 'Smith').first_or_new()
 
 # update existing record
 user = await User.find(2)
