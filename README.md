@@ -97,10 +97,21 @@ It is commonly used for DB migrations.
 # CREATE TABLE
 await schema.create('users',
     schema.column('id').serial().primary_key(),
-    schema.column('email').string().nullable(False).unique(),
-    schema.column('password').string().nullable(False),
+    # schema.column('id').bigserial().primary_key(), # for big tables
+    schema.column('email').string().nullable(False).unique(), # default to 256
+    schema.column('password').string(32).nullable(False),
+    schema.column('message').text().nullable(False),
     schema.column('created_at').timestamp().nullable(False).default("NOW()"),
+    schema.column('dinner_time').timestamptz().nullable(False),
+    schema.column('is_admin').boolean().nullable(False).default(False),
+    schema.column('location_id').integer().nullable(False).index(),
+    # schema.column('location_id').bigint().nullable(False).index(),
+    schema.column('salary').numeric(8, 2).nullable(False),
+    schema.column('settings').jsonb().nullable(False),
 )
+
+# RNAME TABLE
+await schema.rename('users', 'clients')
 
 # ADD TABLE COLUMN
 await schema.table('users',
@@ -115,10 +126,25 @@ await schema.table('users',
 # ADD INDEX
 await schema.table('users',
     schema.index('email', 'created_at'),
+    schema.unique('location_id'),
 )
 
-# DROP INDEX
+# DROP INDEX (index is named by table_col1_col2_idx)
 await schema.dropIndex('users_email_created_at_idx')
+
+# DROP contraint
+await schema.dropConstraint('users', 'unique_key')
+
+# RAW
+return schema.raw("""
+    CREATE TABLE users(
+        id                       INT NOT NULL,
+        created_at               DATE NOT NULL,
+        first_name               VARCHAR(100) NOT NULL,
+        last_name                VARCHAR(100) NOT NULL,
+        birthday_mmddyyyy        CHAR(10) NOT NULL,
+    )
+    """)
 ```
 
 
@@ -231,7 +257,7 @@ users = await User.where("email", 'test@example.com')
 user = User(email='test@example.com', password='password')
 user = await user.save()
 
-# create a new record if "Tom Smith " is not found
+# create a new record if "Tom Smith" is not found
 user = await User.where('first_name', 'Tom').where('last_name', 'Smith').first_or_new()
 
 # update existing record
