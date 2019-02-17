@@ -46,6 +46,9 @@ db.connection('other_db_name')
 
 # the default connection can also be dynamically changed
 db.default = 'other_db_name'
+
+# close DB connection
+asyncio.get_event_loop().run_until_complete(db.stop())
 ```
 
 ### CRUD examples
@@ -209,6 +212,7 @@ By default, the table name should be in the "snake_case" (my_orders),
 and the model name is in CamelCase (MyOrder).
 Please also note table name has an extra 's' at the end unless it already ends with 's'.
 ```python
+# ==== init_service.py ====
 # setup connection
 from windyquery import DB
 from windyquery.model import Event
@@ -221,7 +225,11 @@ asyncio.get_event_loop().run_until_complete(model_db.connect('db_name', {
     'username': 'db_user_name',
     'password': 'db_user_password'
 }, default=True))
+# make sure this runs after definition of all model classes
 Event.db.on_next(model_db)
+
+# ==== models.py ====
+from windyquery import Model
 
 # a Model with default setup
 class User(Model):
