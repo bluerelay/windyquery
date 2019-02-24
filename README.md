@@ -196,6 +196,9 @@ await db.table('users').insertRaw(
     '("id", "name") SELECT $1, $2 WHERE NOT EXISTS (SELECT "id" FROM users WHERE "id" = $1)', [10, 'user name']
 ))
 
+# order_by_raw
+await db.table('users').select().order_by_raw('RANDOM()').limit(10)
+
 # raw
 await db.raw('SELECT * FROM users WHERE id = $1', [2]).first()
 
