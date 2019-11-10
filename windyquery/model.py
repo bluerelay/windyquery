@@ -2,7 +2,7 @@ import asyncio
 import json
 from json.decoder import JSONDecodeError
 import re
-from rx.subjects import BehaviorSubject
+from rx.subject import BehaviorSubject
 
 from .index import DB, Builder
 
