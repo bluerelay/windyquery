@@ -8,15 +8,16 @@ loop = asyncio.get_event_loop()
 def test_read_jsonb(model):
     class Card(Model):
         pass
-    card = loop.run_until_complete(Card.find(5))
+    card = loop.run_until_complete(Card.find(4))
     assert card.data == {
-        "finished": False,
+        "finished": True,
         "name": "Hang paintings",
         "tags": [
             "Improvements",
             "Office"
         ]
     }
+
 
 def test_write_jsonb(model):
     class Card(Model):

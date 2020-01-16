@@ -34,7 +34,7 @@ class ModelMeta(type):
             nonlocal cls
             nonlocal initialized
             cls.db = db
-            if initialized:
+            if initialized or db is None:
                 return
             if not hasattr(cls, 'table'):
                 s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', cls.__name__)
@@ -52,7 +52,7 @@ class ModelMeta(type):
                 else:
                     cls.id = None
             initialized = True
-        Event.db.filter(lambda db: db is not None).subscribe(setup)
+        Event.db.subscribe(setup)
     
 
 class Model(metaclass=ModelMeta):

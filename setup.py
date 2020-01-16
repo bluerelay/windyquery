@@ -14,7 +14,7 @@ setuptools.setup(
     url="https://github.com/bluerelay/windyquery",
     packages=setuptools.find_packages(),
     install_requires=[
-        'asyncpg==0.19.0',
+        'asyncpg==0.20.1',
         'rx==3.0.1',
     ],
     classifiers=[

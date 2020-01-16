@@ -6,11 +6,11 @@ from windyquery import DB, Schema
 @pytest.fixture(scope="module")
 def config():
     class Config:
-        DB_HOST = "localhost",
-        DB_PORT = "5432",
-        DB_TEST = "db_test",
-        DB_USER = "tester name",
-        DB_PASS = "tester password"
+        DB_HOST = "localhost"
+        DB_PORT = "5432"
+        DB_TEST = "windyquery-test"
+        DB_USER = "windyquery-test"
+        DB_PASS = "windyquery-test"
     yield Config
 
 @pytest.fixture(scope="module")

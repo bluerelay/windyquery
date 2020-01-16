@@ -283,3 +283,21 @@ print(user.data)
 user.data['address']['city'] = 'Richmond'
 await user.save()
 ```
+
+### Running tests
+Install pytest to run the included tests,
+```bash
+pip install -U pytest
+```
+
+Set up a postgres server with preloaded data. This can be done by using [docker](https://docs.docker.com/install/) with the [official postgre docker image](https://hub.docker.com/_/postgres),
+```bash
+docker run --rm --name windyquery-test -p 5432:5432 -v ${PWD}/windyquery/tests/seed_test_data.sql:/docker-entrypoint-initdb.d/seed_test_data.sql -e POSTGRES_USER=windyquery-test -e POSTGRES_PASSWORD=windyquery-test -e POSTGRES_DB=windyquery-test -d postgres:12-alpine
+```
+
+Note: to use existing postgres server, it must be configured to have the correct user, password, and database needed in tests/conftest.py. Data needed by tests is in tests/seed_test_data.sql.
+
+To run the tests,
+```bash
+pytest
+```

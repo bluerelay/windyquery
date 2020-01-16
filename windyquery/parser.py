@@ -49,7 +49,12 @@ class SQL:
             return self.action(self.sql)
 
     def identifier(self, var):
-        return utils._quote_ident(var)
+        parts = var.split('.')
+        # information_schema is an object can not be referred by identifier
+        if len(parts) == 2 and parts[0] == 'information_schema':
+            return var
+        else:
+            return utils._quote_ident(var)
 
     def literal(self, var):
         return utils._quote_literal(var)
