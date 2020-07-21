@@ -3,6 +3,7 @@ import pytest
 
 from windyquery import DB, Schema
 
+
 @pytest.fixture(scope="module")
 def config():
     class Config:
@@ -13,9 +14,11 @@ def config():
         DB_PASS = "windyquery-test"
     yield Config
 
+
 @pytest.fixture(scope="module")
 def db(config):
     app_db = DB()
+
     async def init_db():
         return await app_db.connect('db_test', {
             'host': config.DB_HOST,
@@ -28,9 +31,11 @@ def db(config):
     yield app_db
     asyncio.get_event_loop().run_until_complete(app_db.stop())
 
+
 @pytest.fixture(scope="module")
 def schema(config):
     app_schema = Schema()
+
     async def init_schema():
         return await app_schema.connect('db_test', {
             'host': config.DB_HOST,
@@ -42,6 +47,7 @@ def schema(config):
     asyncio.get_event_loop().run_until_complete(init_schema())
     yield app_schema
     asyncio.get_event_loop().run_until_complete(app_schema.stop())
+
 
 @pytest.fixture(scope="module")
 def model(config):

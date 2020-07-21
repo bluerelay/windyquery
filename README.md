@@ -284,6 +284,34 @@ user.data['address']['city'] = 'Richmond'
 await user.save()
 ```
 
+### Listen for a notification
+Postgres implements [LISTEN/NOTIFY](https://www.postgresql.org/docs/9.4/sql-listen.html) for interprocess communications.
+In order to listen on a channel, use the DB.listen() method. It returns an awaitable object, which resolves to a dict when a notification fires.
+```python
+# method 1: manually call start() and stop()
+listener = db.listen('my_table')
+await listener.start()
+try:
+    for _ in range(100):
+        result = await listener
+        # or result = await listener.next()
+        print(result) 
+        # {
+        #     'channel': 'my_table',
+        #     'payload': 'payload fired by the notifier',
+        #     'listener_pid': 7321,
+        #     'notifier_pid': 7322
+        # }
+finally:
+    await listener.stop()
+
+# method 2: use with statement
+async with db.listen('my_table') as listener:
+    for _ in range(100):
+        result = await listener
+        print(result)
+```
+
 ### Running tests
 Install pytest to run the included tests,
 ```bash

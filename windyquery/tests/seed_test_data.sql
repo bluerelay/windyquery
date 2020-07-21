@@ -33,3 +33,13 @@ INSERT INTO boards ("user_id", "location") VALUES
 CREATE TABLE country ("numeric_code" INTEGER PRIMARY KEY, "name" VARCHAR(255), "alpha2" CHAR(2));
 
 CREATE TABLE cards_copy (id INTEGER, board_id INTEGER);
+
+CREATE OR REPLACE FUNCTION cards_after_insert() RETURNS trigger LANGUAGE 'plpgsql' AS
+$$
+BEGIN
+    PERFORM (SELECT pg_notify('cards', 'after insert'));
+    RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER cards_trigger AFTER INSERT ON cards FOR EACH ROW EXECUTE PROCEDURE cards_after_insert();

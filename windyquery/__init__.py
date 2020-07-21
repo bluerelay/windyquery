@@ -1,4 +1,4 @@
-from .index import Connection
-from .index import DB
-from .index import Schema
+from .connection import Connection
+from .db import DB
+from .schema import Schema
 from .model import Model

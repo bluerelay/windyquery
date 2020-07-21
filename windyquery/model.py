@@ -4,7 +4,9 @@ from json.decoder import JSONDecodeError
 import re
 from rx.subject import BehaviorSubject
 
-from .index import DB, Builder
+from .db import DB
+from .builder import Builder
+
 
 class Event:
     """hold events"""
@@ -30,6 +32,7 @@ class ModelMeta(type):
             return
 
         initialized = False
+
         def setup(db):
             nonlocal cls
             nonlocal initialized
@@ -43,17 +46,20 @@ class ModelMeta(type):
             if hasattr(cls, 'columns'):
                 cols = cls.columns
             else:
-                cols = asyncio.get_event_loop().run_until_complete(cls.db.raw("SELECT column_name, ordinal_position, data_type FROM information_schema.columns WHERE table_name = '{}'".format(cls.table)))
-            cls.columns = tuple(Column(col['column_name'], col['data_type'], col['ordinal_position']) for col in cols)
+                cols = asyncio.get_event_loop().run_until_complete(cls.db.raw(
+                    "SELECT column_name, ordinal_position, data_type FROM information_schema.columns WHERE table_name = '{}'".format(cls.table)))
+            cls.columns = tuple(Column(
+                col['column_name'], col['data_type'], col['ordinal_position']) for col in cols)
             if not hasattr(cls, 'id'):
-                row = asyncio.get_event_loop().run_until_complete(cls.db.raw("SELECT column_name FROM information_schema.key_column_usage AS c LEFT JOIN information_schema.table_constraints AS t ON t.constraint_name = c.constraint_name WHERE t.table_name = '{}' AND t.constraint_type = 'PRIMARY KEY'".format(cls.table)).first())
+                row = asyncio.get_event_loop().run_until_complete(cls.db.raw(
+                    "SELECT column_name FROM information_schema.key_column_usage AS c LEFT JOIN information_schema.table_constraints AS t ON t.constraint_name = c.constraint_name WHERE t.table_name = '{}' AND t.constraint_type = 'PRIMARY KEY'".format(cls.table)).first())
                 if row and 'column_name' in row:
                     cls.id = row['column_name']
                 else:
                     cls.id = None
             initialized = True
         Event.db.subscribe(setup)
-    
+
 
 class Model(metaclass=ModelMeta):
     """represents a DB record with querry functions"""
@@ -150,7 +156,6 @@ class Model(metaclass=ModelMeta):
                 type(self).set(self, model)
         return self
 
-
     async def delete(self):
         """Delete from DB"""
 
@@ -178,7 +183,8 @@ class ModelBuilder(Builder):
             raise UserWarning("SQL Builder is not complete")
         rows = await super().exec()
         if isinstance(rows, list):
-            result = [self.model_cls.set(self.model_cls(), row) for row in rows]
+            result = [self.model_cls.set(self.model_cls(), row)
+                      for row in rows]
         else:
             if rows:
                 result = self.model_cls.set(self.model_cls(), rows)
