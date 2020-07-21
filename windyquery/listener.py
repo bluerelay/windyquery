@@ -36,20 +36,21 @@ class Listener:
             raise UserWarning(
                 "too many unprocessed notifications: {}".format(self.channel))
         f = self.results[-1]
+        self.results.append(asyncio.Future())
         f.set_result({
             'listener_pid': conn.get_server_pid(),
             'notifier_pid': pid,
             'channel': channel,
             'payload': payload
         })
-        self.results.append(asyncio.Future())
 
     async def next(self):
         if self.connection is None:
             await self.start()
         if(len(self.results) == 0):
             return None
-        result = await self.results.pop(0)
+        result = await self.results[0]
+        self.results.pop(0)
         return result
 
     def __await__(self):
