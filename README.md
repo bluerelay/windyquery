@@ -361,7 +361,7 @@ async with db.listen('my_table') as listener:
 ```
 
 ### Tests
-Windyquery includes tests [LISTEN/NOTIFY](https://github.com/bluerelay/windyquery/tree/master/windyquery/tests). These tests are also good examples on how to use this library.
+Windyquery includes [tests](https://github.com/bluerelay/windyquery/tree/master/windyquery/tests). These tests are also good examples on how to use this library.
 
 #### Running tests
 Install pytest to run the included tests,
