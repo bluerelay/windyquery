@@ -11,7 +11,7 @@ $ pip install windyquery
 ```python
 import asyncio
 
-from windyquery import DB, Schema
+from windyquery import DB
 
 # create DB connection for CRUD operatons
 db = DB()
@@ -31,20 +31,10 @@ asyncio.get_event_loop().run_until_complete(db.connect('other_db_name', {
     'password': 'db_user_password'
 }, default=False))
 
-# create DB connection for migration operations
-schema = Schema()
-asyncio.get_event_loop().run_until_complete(schema.connect('db_name', {
-    'host': 'localhost',
-    'port': '5432',
-    'database': 'db_name',
-    'username': 'db_user_name',
-    'password': 'db_user_password'
-}, default=True, min_size=1, max_size=1))
-
 # switch connections between different databases
 db.connection('other_db_name')
 
-# the default connection can also be dynamically changed
+# the default connection can also be changed directly
 db.default = 'other_db_name'
 
 # close DB connection
@@ -54,92 +44,231 @@ asyncio.get_event_loop().run_until_complete(db.stop())
 ### CRUD examples
 A DB instance can be used to constuct a SQL. The instance is a coroutine object.
 It can be scheduled to run by all [asyncio](https://docs.python.org/3/library/asyncio-task.html) mechanisms.
+
+#### Build a SQL and execute it
 ```python
-# SELECT
 async def main(db):
-    user = await db.table('users').select().first()
-    print(user['name'])
+    # SELECT * FROM users
+    users = await db.table('users').select('id', 'name')
+    print(users[0]['name'])
 
 asyncio.run(main(db))
+```
 
-# INSERT
+#### SELECT
+```python
+# SELECT name AS username, address addr FROM users
+await db.table('users').select('name AS username', 'address addr')
+
+# SELECT * FROM users WHERE id = 1 AND name = 'Tom'
+await db.table('users').select().where('id', 1).where('name', 'Tom')
+
+# SELECT * FROM users WHERE id = 1 AND name = 'Tom'
+await db.table('users').select().where('id', '=', 1).where('name', '=', 'Tom')
+
+# SELECT * FROM users WHERE id = 1 AND name = 'Tom'
+await db.table('users').select().where('id = ? AND name = ?', 1, 'Tom')
+
+# SELECT * FROM users WHERE id IN (1, 2)
+await db.table('cards').select().where("id", [1, 2]))
+
+# SELECT * FROM users WHERE id IN (1, 2)
+await db.table('cards').select().where("id", 'IN', [1, 2]))
+
+# SELECT * FROM users WHERE id IN (1, 2)
+await db.table('cards').select().where("id IN (?, ?)", 1, 2))
+
+# SELECT * FROM users ORDER BY id, name DESC
+await db.table('users').select().order_by('id', 'name DESC')
+
+# SELECT * FROM users GROUP BY id, name
+await db.table('users').select().group_by('id', 'name')
+
+# SELECT * FROM users LIMIT 100 OFFSET 10
+await db.table('users').select().limit(100).offset(10)
+
+# SELECT users.*, orders.total FROM users
+#   JOIN orders ON orders.user_id = users.id
+await db.table('users').select('users.*', 'orders.total').\
+    join('orders', 'orders.user_id', '=', 'users.id')
+    
+# SELECT users.*, orders.total FROM users
+#   JOIN orders ON orders.user_id = users.id AND orders.total > 100
+await db.table('users').select('users.*', 'orders.total').\
+    join('orders', 'orders.user_id = users.id AND orders.total > ?', 100)
+```
+
+#### INSERT
+```python
+# INSERT INTO users(id, name) VALUES
+#   (1, 'Tom'),
+#   (2, 'Jerry'),
+#   (3, DEFAULT)
 await db.table('users').insert(
-    {'email': 'test1@example.com', 'password': 'my precious'},
-    {'email': 'test2@example.com', 'password': 'my precious'}
+    {'id': 1, 'name': 'Tom'},
+    {'id': 2, 'name': 'Jerry'},
+    {'id': 3, 'name': 'DEFAULT'}
 )
 
-# UPDATE
-await db.table('users').where('id', 2).update({'name': 'new name'})
+# INSERT INTO users(id, name) VALUES
+#   (1, 'Tom'),
+#   (2, 'Jerry'),
+#   (3, DEFAULT)
+#   RETRUNING id, name
+await db.table('users').insert(
+    {'id': 1, 'name': 'Tom'},
+    {'id': 2, 'name': 'Jerry'},
+    {'id': 3, 'name': 'DEFAULT'}
+).returning('id', 'name')
 
-# DELETE
-await db.table('users').where('id', 2).delete()
+# INSERT INTO users(id, name) VALUES
+#   (1, 'Tom'),
+#   (2, 'Jerry'),
+#   (3, DEFAULT)
+#   RETRUNING *
+await db.table('users').insert(
+    {'id': 1, 'name': 'Tom'},
+    {'id': 2, 'name': 'Jerry'},
+    {'id': 3, 'name': 'DEFAULT'}
+).returning()
+```
 
-# Table JOIN
-purchases = await db.table('users').join(
-    'orders', 'orders.user_id', '=', 'users.id'
-).join(
-    'products', 'products.id', '=', 'orders.product_id'
-).select(
-    'users.name AS buyer', 'products.name AS item'
-).where("users.id", 2)
+#### UPDATE
+```python
+# UPDATE cards SET name = 'Tom' WHERE id = 9
+await db.table('cards').where('id', 9).update({'name': 'Tom'})
 
-# GROUP BY
-purchases = await db.table('orders').select('user_name').group_by('user_id')
+# UPDATE users SET name = orders.name
+#   FROM orders
+#   WHERE orders.user_id = users.id
+await db.table('users').update('name = orders.name').\
+    from_table('orders').\
+    where('orders.user_id = users.id')
 
-# ORDER BY
-my_orders = await db.table('orders').select().order_by('sub_total DESC', 'user_id')
+# UPDATE users SET name = products.name
+#   FROM orders
+#   JOIN products ON orders.product_id = products.id
+#   WHERE orders.user_id = users.id
+await db.table('users').update('name = product.name').\
+    from_table('orders').\
+    join('products', 'orders.product_id', '=', 'products.id').\
+    where('orders.user_id = users.id')
+```
 
-# LIMIT
-users = await db.table('users').select().order_by('name').limit(3)
+#### DELETE
+```python
+# DELETE FROM users WHERE id = 1
+await db.table('users').where('id', 1).delete()
+
+# DELETE FROM users WHERE id = 1 RETURNING id, name
+await db.table('users').where('id', 1).delete().returning('id', 'name')
 ```
 
 ### Migration examples
-A Shema instance is for creating or altering tables.
-It is commonly used for DB migrations.
+The DB instance can also be used to migrate database schema.
+
+#### CREATE TABLE
 ```python
-# CREATE TABLE
-await schema.create('users',
-    schema.column('id').serial().primary_key(),
-    # schema.column('id').bigserial().primary_key(), # for big tables
-    schema.column('email').string().nullable(False).unique(), # default to 256
-    schema.column('password').string(32).nullable(False),
-    schema.column('message').text().nullable(False),
-    schema.column('created_at').timestamp().nullable(False).default("NOW()"),
-    schema.column('dinner_time').timestamptz().nullable(False),
-    schema.column('is_admin').boolean().nullable(False).default(False),
-    schema.column('location_id').integer().nullable(False).index(),
-    # schema.column('location_id').bigint().nullable(False).index(),
-    schema.column('salary').numeric(8, 2).nullable(False),
-    schema.column('settings').jsonb().nullable(False),
+# CREATE TABLE users (
+#    id            serial PRIMARY KEY,
+#    group_id      integer references groups (id) ON DELETE CASCADE,
+#    created_at    timestamp not null DEFAULT NOW(),
+#    email         text not null unique,
+#    is_admin      boolean not null default false,
+#    address       jsonb,
+#    payday        integer not null,
+#    CONSTRAINT check(payday > 0 and payday < 8)
+#)
+await db.schema('TABLE users').create(
+    'id            serial PRIMARY KEY',
+    'group_id      integer references groups (id) ON DELETE CASCADE',
+    'created_at    timestamp not null DEFAULT NOW()',
+    'email         text not null unique',
+    'is_admin      boolean not null default false',
+    'address       jsonb',
+    'payday        integer not null',
+    'CONSTRAINT    UNIQUE(group_id, email)',
+    'CONSTRAINT check(payday > 0 and payday < 8)',
 )
 
-# RNAME TABLE
-await schema.rename('users', 'clients')
-
-# ADD TABLE COLUMN
-await schema.table('users',
-    schema.column('admin').boolean().nullable(False).default(False)
+# CREATE TABLE accounts LIKE users
+await db.schema('TABLE accounts').create(
+    'like users'
 )
 
-# DROP TABLE COLUMN
-await schema.table('users',
-    schema.column('admin').drop(),
+# CREATE TABLE IF NOT EXISTS accounts LIKE users
+await db.schema('TABLE IF NOT EXISTS accounts').create(
+    'like users'
+)
+```
+
+#### Modify TABLE
+```python
+# ALTER TABLE users
+#   ALTER   id TYPE bigint,
+#   ALTER   name SET DEFAULT 'no_name',
+#   ALTER   COLUMN address DROP DEFAULT,
+#   ALTER   "user info" SET NOT NULL,
+#   ALTER   CONSTRAINT check(payday > 1 and payday < 6),
+#   ADD     UNIQUE(name, email) WITH (fillfactor=70),
+#   ADD     FOREIGN KEY (group_id) REFERENCES groups (id) ON DELETE SET NULL,
+#   DROP    CONSTRAINT IF EXISTS idx_email CASCADE
+await db.schema('TABLE users').alter(
+    'alter  id TYPE bigint',
+    'alter  name SET DEFAULT \'no_name\'',
+    'alter  COLUMN address DROP DEFAULT',
+    'alter  "user info" SET NOT NULL',
+    'add    CONSTRAINT check(payday > 1 and payday < 6)',
+    'add    UNIQUE(name, email) WITH (fillfactor=70)',
+    'add    FOREIGN KEY (group_id) REFERENCES groups (id) ON DELETE SET NULL',
+    'drop   CONSTRAINT IF EXISTS idx_email CASCADE',
 )
 
-# ADD INDEX
-await schema.table('users',
-    schema.index('email', 'created_at'),
-    schema.unique('location_id'),
-)
+# ALTER TABLE users RENAME TO accounts
+await db.schema('TABLE users').alter('RENAME TO accounts')
 
-# DROP INDEX (index is named by table_col1_col2_idx)
-await schema.dropIndex('users_email_created_at_idx')
+# ALTER TABLE users RENAME email TO email_address
+await db.schema('TABLE users').alter('RENAME email TO email_address')
 
-# DROP contraint
-await schema.dropConstraint('users', 'unique_key')
+# ALTER TABLE users RENAME CONSTRAINT idx_name TO index_name
+await db.schema('TABLE users').alter('RENAME CONSTRAINT idx_name TO index_name')
 
-# RAW
-return schema.raw("""
+# ALTER TABLE users ADD COLUMN address text
+await db.schema('TABLE users').alter('ADD COLUMN address text')
+
+# ALTER TABLE users DROP address
+await db.schema('TABLE users').alter('DROP address')
+
+# CREATE INDEX idx_email ON users (name, email)
+await db.schema('INDEX idx_email ON users').create('name', 'email')
+
+# DROP INDEX idx_email CASCADE
+await db.schema('INDEX idx_email').drop('CASCADE')
+
+# DROP TABLE users
+await db.schema('TABLE users').drop()
+```
+
+### Raw
+The `raw` method can be used to execute any form of SQL. Usually the `raw` method is used to execute complex hard-coded (versus dynamically built) queries. It's also very common to use `raw` method to run migrations.
+
+The input to `raw` method is not validated, so it is not safe from SQL injection.
+
+#### RAW for complex SQL
+```python
+await db.raw('SELECT ROUND(AVG(group_id),1) AS avg_id, COUNT(1) AS total_users FROM users WHERE id in ($1, $2, $3)', 4, 5, 6)
+
+await db.raw("SELECT * FROM (VALUES (1, 'one'), (2, 'two'), (3, 'three')) AS t (num, letter)")
+
+await db.raw("""
+    INSERT INTO user (id, name)
+        SELECT $1, $2 WHERE NOT EXISTS (SELECT id FROM users WHERE id = $1)
+""", 1, 'Tom')
+```
+
+#### RAW for migration
+```python
+await schema.raw("""
     CREATE TABLE users(
         id                       INT NOT NULL,
         created_at               DATE NOT NULL,
@@ -147,145 +276,64 @@ return schema.raw("""
         last_name                VARCHAR(100) NOT NULL,
         birthday_mmddyyyy        CHAR(10) NOT NULL,
     )
-    """)
+""")
 ```
 
 
 ### JSONB examples
-```python
-# Create JSONB
-await schema.create('users',
-    schema.column('id').serial().primary_key(),
-    schema.column('data').jsonb(),
-)
+Methods are created to support jsonb data type for some simple use cases.
 
-# Insert JSONB
+#### Create a table with jsonb data type
+```python
+# CREATE TABLE users (
+#    id     serial PRIMARY KEY,
+#    data   jsonb
+#)
+await db.schema('TABLE users').create(
+    'id     serial PRIMARY KEY',
+    'data   jsonb',
+)
+```
+
+#### Select jsonb field
+```python
+# SELECT data->name AS name, data->>name AS name_text FROM users
+rows = await db.table('users').select('data', 'data->name AS name', 'data->>name AS name_text')
+# rows[0]['data'] == '{"name":"Tom"}'
+# rows[0]['name'] == '"Tom"'
+# rows[0]['name_text'] == 'Tom'
+
+# SELECT data->name AS name FROM users WHERE data->>name LIKE 'Tom%'
+await db.table('users').select('data->name AS name').where('data->>name', 'LIKE', 'Tom%')
+
+# SELECT data->name AS name FROM users WHERE data->name = '"Tom"'
+await db.table('users').select('data->name AS name').where("data->name", 'Tom')
+```
+
+#### Insert jsonb field
+```python
+# INSERT INTO users (data) VALUES
+#   ('{"name": "Tom"}'),
+#   ('{"name": "Jerry"}')
+#   RETURNING *
 await db.table('users').insert(
-    {'data': {'name': 'user1', 'address': {'city': 'Chicago', 'state': 'IL'}}},
-    {'data': {'name': 'user2', 'address': {'city': 'New York', 'state': 'NY'}, 'admin': True}},
-)
-
-# SELECT JSONB
-user = await db.table('users').select(
-    'data->name AS name',
-    'data->>name AS name_text',
-    'data->address AS address'
-).where('id', 2).first() 
-# row['name'] == '"user2"'
-# row['name_text'] == 'user2'
-# row['address'] == '{"name":"user2", "address":{"city":"New York", "state":"NY"}}'
-
-# UPDATE JSONB
-await db.table('users').where('id', 2).update({'data': {'address': {'city': 'Richmond'}}})
-await db.table('users').where('id', 2).update({'data->address->city': 'Richmond'})
-
-# JSONB in WHERE clause
-users = await db.table('users').select('data->>name AS name').where("data->address->city", 'Chicago')
+    {'data': {'name': 'Tom'}},
+    {'data': {'name': 'Jerry'}},
+).returning()
 ```
 
-### Raw sql examples
-Raw sql is needed for creating complex queries.
+#### Update jsonb field
 ```python
-# select_raw
-await db.table('users').select_raw(
-    'ROUND(AVG(id),1) AS avg_id, COUNT(1) AS copies'
-).where('id', [4,5,6]).first()
+# UPDATE SET data = '{"address": {"city": "New York"}}'
+await db.table('users').update({'data': {'address': {'city': 'New York'}}})
 
-# insertRaw
-await db.table('users').insertRaw(
-    '("id", "name") SELECT $1, $2 WHERE NOT EXISTS (SELECT "id" FROM users WHERE "id" = $1)', [10, 'user name']
-))
-
-# order_by_raw
-await db.table('users').select().order_by_raw('RANDOM()').limit(10)
-
-# raw
-await db.raw('SELECT * FROM users WHERE id = $1', [2]).first()
-
-# use asyncpg (https://magicstack.github.io/asyncpg/current/usage.html)
-async with db.conn_pools['db_name'].acquire() as connection:
-    await connection.fetchrow('SELECT * FROM test')
-
+# UPDATE SET data = jsonb_set(data, '{address,city}', '"Chicago"')
+await db.table('users').update({'data->address->city': 'Chicago'})
 ```
 
-### Model
-To use Model, a **primary key** is required by the underneath table.
-By subclassing windyquery.Model calss, you create a model for your table.
-By default, the table name should be in the "snake_case" (my_orders),
-and the model name is in CamelCase (MyOrder).
-Please also note table name has an extra 's' at the end unless it already ends with 's'.
-```python
-# ==== init_service.py ====
-# setup connection
-from windyquery import DB
-from windyquery.model import Event
-
-model_db = DB()
-asyncio.get_event_loop().run_until_complete(model_db.connect('db_name', {
-    'host': 'localhost',
-    'port': '5432',
-    'database': 'db_name',
-    'username': 'db_user_name',
-    'password': 'db_user_password'
-}, default=True))
-# make sure this runs after definition of all model classes
-Event.db.on_next(model_db)
-
-# ==== models.py ====
-from windyquery import Model
-
-# a Model with default setup
-class User(Model):
-    pass
-# User.table == 'users'
-
-# more about naming convention
-class AdminUser(Model):
-    pass
-# AdminUser.table == 'admin_users'
-
-# override table name
-class Custom(Model):
-    table = 'my_custom'
-# Custom.table == 'my_custom'
-
-# find by id
-user = await User.find(2)
-# user.id == 2
-
-# find mutiple
-users = await User.find([1, 2])
-# users[1].id == 2
-
-# all
-all_users = await User.all()
-
-# find by where
-user = await User.where("email", 'test@example.com').first()
-users = await User.where("email", 'test@example.com')
-
-# save a new record
-user = User(email='test@example.com', password='password')
-user = await user.save()
-
-# create a new record if "Tom Smith" is not found
-user = await User.where('first_name', 'Tom').where('last_name', 'Smith').first_or_new()
-
-# update existing record
-user = await User.find(2)
-user.name = 'new name'
-await user.save()
-
-# JOSNB is converted to the matching python types (dict, list)
-user = await User.find(2)
-print(user.data)
-# {'data': {'name': 'user2', 'address': {'city': 'New York', 'state': 'NY'}}
-user.data['address']['city'] = 'Richmond'
-await user.save()
-```
 
 ### Listen for a notification
-Postgres implements [LISTEN/NOTIFY](https://www.postgresql.org/docs/9.4/sql-listen.html) for interprocess communications.
+Postgres implements [LISTEN/NOTIFY](https://www.postgresql.org/docs/12/sql-listen.html) for interprocess communications.
 In order to listen on a channel, use the DB.listen() method. It returns an awaitable object, which resolves to a dict when a notification fires.
 ```python
 # method 1: manually call start() and stop()
@@ -312,7 +360,10 @@ async with db.listen('my_table') as listener:
         print(result)
 ```
 
-### Running tests
+### Tests
+Windyquery includes tests [LISTEN/NOTIFY](https://github.com/bluerelay/windyquery/tree/master/windyquery/tests). These tests are also good examples on how to use this library.
+
+#### Running tests
 Install pytest to run the included tests,
 ```bash
 pip install -U pytest

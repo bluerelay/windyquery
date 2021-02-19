@@ -5,18 +5,16 @@ class Listener:
     """The class for listen postgres notifications"""
     MAX_BUFFER_SIZE = 1000000
 
-    def __init__(self, db, channel):
-        self.db = db
+    def __init__(self, pool, channel):
+        self.pool = pool
         self.channel = channel
         self.connection = None
-        self.results = None
+        self.results = []
 
     async def start(self):
         if self.connection is not None:
-            raise UserWarning(
-                "already listening on channel: {}".format(self.channel))
-        pool = self.db.conn_pools[self.db.default]
-        self.connection = await pool.acquire()
+            raise UserWarning(f"already listening on channel: {self.channel}")
+        self.connection = await self.pool.acquire()
         self.results = [asyncio.Future()]
         await self.connection.add_listener(self.channel, self.handle_notifications)
 
@@ -26,10 +24,9 @@ class Listener:
                 f.cancel()
             await self.connection.remove_listener(self.channel, self.handle_notifications)
         finally:
-            pool = self.db.conn_pools[self.db.default]
-            await pool.release(self.connection)
+            await self.pool.release(self.connection)
             self.connection = None
-            self.results = None
+            self.results = []
 
     def handle_notifications(self, conn, pid, channel, payload):
         if(len(self.results) >= self.MAX_BUFFER_SIZE):

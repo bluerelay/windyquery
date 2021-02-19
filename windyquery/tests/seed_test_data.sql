@@ -9,8 +9,8 @@ INSERT INTO cards ("board_id", "data") VALUES
     (2, '{ "name": "Hang paintings", "tags":["Improvements", "Office"], "finished":true }'::jsonb),
     (3, '{}'::jsonb),
     (9, '{ "address": { "city": "Chicago" } }'::jsonb),
-    (5, '{}'::jsonb),
-    (11, '{}'::jsonb),
+    (5, '{ "skill": { "java": "good" } }'::jsonb),
+    (11, '[{"a":"foo"},{"b":"bar"},{"c":"baz"}]'::jsonb),
     (21, '{}'::jsonb);
 
 
@@ -43,3 +43,7 @@ END;
 $$;
 
 CREATE TRIGGER cards_trigger AFTER INSERT ON cards FOR EACH ROW EXECUTE PROCEDURE cards_after_insert();
+
+CREATE TABLE students ("id" serial PRIMARY KEY, "firstname" TEXT, "lastname" TEXT);
+
+CREATE SCHEMA test1;

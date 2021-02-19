@@ -1,10 +1,11 @@
 import asyncio
 
+from windyquery import DB
 
 loop = asyncio.get_event_loop()
 
 
-def test_listen_insert(db):
+def test_listen_insert(db: DB):
 
     async def cards_after_insert():
         test_id = 8000
@@ -27,7 +28,7 @@ def test_listen_insert(db):
     assert result['notifier_pid'] > 0
 
 
-def test_listen_insert_with_stmt(db):
+def test_listen_insert_with_stmt(db: DB):
 
     async def cards_after_insert():
         test_id = 8000
