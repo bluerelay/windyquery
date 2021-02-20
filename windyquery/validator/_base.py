@@ -39,7 +39,7 @@ class Base:
         raise ValidationError(f"error at {val!r}")
 
     def __init__(self):
-        self._lexer = lex.lex(module=self)
+        self._lexer = lex.lex(module=self, optimize=1)
         self._parser = yacc.yacc(module=self, start=self._start, debug=False)
 
     def parse(self, s: str, ctx: Ctx):
