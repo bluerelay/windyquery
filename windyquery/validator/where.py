@@ -15,7 +15,7 @@ class Where(Expr):
     # rules
     _start = 'where'
 
-    precedence = (
+    precedence = Expr.precedence + (
         ('left', 'OR'),
         ('left', 'AND'),
     )

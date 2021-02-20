@@ -34,12 +34,14 @@ def process_value(val: Any) -> Tuple[str, Any]:
         val = 'NULL'
     elif val == 'DEFAULT':
         val = 'DEFAULT'
-    elif isinstance(val, dict):
+    elif isinstance(val, dict) or isinstance(val, list):
         param = json.dumps(val)
         val = '?'
     elif isinstance(val, bool):
-        param = val
-        val = '?'
+        if val:
+            val = 'TRUE'
+        else:
+            val = 'FALSE'
     elif isinstance(val, str):
         val = quote_literal(val)
     return val, param

@@ -4,14 +4,12 @@ from windyquery.combiner import Combiner
 
 class SchemaBase:
     """Base class for schema builder methods"""
-
-    def _reset_schema(self):
-        self.schema_collector = Collector()
-        self.schema_combiner = Combiner(self.schema_collector)
+    collector: Collector
+    combiner: Combiner
 
     def schema(self, s: str):
         self.mode = 'schema'
-        self.schema_collector.schema(s)
+        self.collector.schema(s)
         return self
 
     def build_create(self, _):
@@ -24,7 +22,7 @@ class SchemaBase:
         return None, None
 
     def build_schema(self):
-        result = self.schema_combiner.run()
+        result = self.combiner.run()
         if result['_id'] == 'create':
             sql = self.build_create(result)
         elif result['_id'] == 'drop':

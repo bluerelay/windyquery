@@ -3,6 +3,7 @@ from ply.lex import LexToken
 
 from windyquery.ctx import Ctx
 from windyquery.validator import ValidationError
+from windyquery.utils import process_value
 from ._base import Base
 
 TOKEN = 'WHERE'
@@ -43,12 +44,27 @@ class Where(Base):
                 _where += ' NULL'
                 params = []
             else:
+                jsonbTest = '->' in _where
                 if operator == 'IN' or operator == 'NOT IN':
-                    _where += ' (' + ', '.join(len(val) * ['?']) + ')'
-                    params = val
+                    params = []
+                    vs = []
+                    for v in val:
+                        processed, _ = process_value(v)
+                        if processed == '?' or jsonbTest:
+                            params.append(v)
+                            vs.append('?')
+                        else:
+                            vs.append(str(processed))
+                    _where += ' (' + ', '.join(vs) + ')'
                 else:
-                    _where += ' ?'
-                    params = [val]
+                    params = []
+                    processed, _ = process_value(val)
+                    if processed == '?' or jsonbTest:
+                        params.append(val)
+                        _where += ' ?'
+                    else:
+                        _where += f' {processed}'
+
             try:
                 ctx = Ctx(self.paramOffset, params)
                 sql = self.validator.validate_where(_where, ctx)

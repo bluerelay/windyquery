@@ -15,6 +15,8 @@ from .value_list import ValueList
 from .schema import Schema
 from .create import Create
 from .alter import Alter
+from .conflict_target import ConflictTarget
+from .conflict_action import ConflictAction
 
 from ._base import ValidationError
 
@@ -32,6 +34,8 @@ _value_list = ValueList()
 _schema = Schema()
 _create = Create()
 _alter = Alter()
+_conflict_target = ConflictTarget()
+_conflict_action = ConflictAction()
 
 
 class Validator:
@@ -89,3 +93,9 @@ class Validator:
 
     def validate_alter(self, s: str) -> str:
         return _alter.parse(s, Ctx())
+
+    def validate_conflict_target(self, s: str) -> str:
+        return _conflict_target.parse(s, Ctx())
+
+    def validate_conflict_action(self, s: str, ctx: Ctx) -> str:
+        return _conflict_action.parse(s, ctx)

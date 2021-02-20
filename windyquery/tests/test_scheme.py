@@ -190,6 +190,11 @@ def test_5create_index(db: DB):
             'email_address',
             'user_token',
         )
+        # create partial index
+        await db.schema('UNIQUE INDEX unique_num912 ON test_table').create(
+            'num9',
+            'num12',
+        ).where('num9', '>', 1)
         # create gin index
         await db.schema('INDEX IF NOT EXISTS idx_json2 ON test_table USING GIN').create(
             '(json2->firstname)',
@@ -198,6 +203,10 @@ def test_5create_index(db: DB):
     rows = loop.run_until_complete(db.table('pg_indexes').where(
         'tablename', 'test_users2').where('indexname', 'idx_users_email').select())
     assert len(rows) == 1
+    rows = loop.run_until_complete(db.table('pg_indexes').where(
+        'tablename', 'test_table').where('indexname', 'unique_num912').select())
+    assert len(rows) == 1
+    assert 'WHERE (num9 > 1)' in rows[0]['indexdef']
     rows = loop.run_until_complete(db.table('pg_indexes').where(
         'tablename', 'test_table').where('indexname', 'idx_json2').select())
     assert len(rows) == 1

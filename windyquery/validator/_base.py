@@ -56,6 +56,8 @@ class Base:
         # do not escape information_schema as identifier
         if item == 'information_schema':
             return item
+        elif item == 'EXCLUDED':
+            return item
         else:
             return utils._quote_ident(item)
 

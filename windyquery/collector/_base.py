@@ -7,42 +7,56 @@ class StartSelectToken(LexToken):
     def __init__(self):
         self.type = 'START_SELECT'
         self.value = 'START_SELECT'
+        self.lineno = 0
+        self.lexpos = 0
 
 
 class StartUpdateToken(LexToken):
     def __init__(self):
         self.type = 'START_UPDATE'
         self.value = 'START_UPDATE'
+        self.lineno = 0
+        self.lexpos = 0
 
 
 class StartInsertToken(LexToken):
     def __init__(self):
         self.type = 'START_INSERT'
         self.value = 'START_INSERT'
+        self.lineno = 0
+        self.lexpos = 0
 
 
 class StartDeleteToken(LexToken):
     def __init__(self):
         self.type = 'START_DELETE'
         self.value = 'START_DELETE'
+        self.lineno = 0
+        self.lexpos = 0
 
 
 class StartCreateToken(LexToken):
     def __init__(self):
         self.type = 'START_CREATE'
         self.value = 'START_CREATE'
+        self.lineno = 0
+        self.lexpos = 0
 
 
 class StartDropToken(LexToken):
     def __init__(self):
         self.type = 'START_DROP'
         self.value = 'START_DROP'
+        self.lineno = 0
+        self.lexpos = 0
 
 
 class StartAlterToken(LexToken):
     def __init__(self):
         self.type = 'START_ALTER'
         self.value = 'START_ALTER'
+        self.lineno = 0
+        self.lexpos = 0
 
 
 class Base:

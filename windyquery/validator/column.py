@@ -86,8 +86,6 @@ class Column(Expr, Bracket):
         'START': 'START',
         'INCREMENT': 'INCREMENT',
         'NOW': 'NOW',
-        'TRUE': 'TRUE',
-        'FALSE': 'FALSE',
     }
 
     tokens = Expr.tokens + Bracket.tokens + \
@@ -100,7 +98,7 @@ class Column(Expr, Bracket):
          'CURRENT_TIMESTAMP', 'NEXTVAL', 'UNIQUE', 'PRIMARY', 'KEY', 'AND', 'OR',
          'REFERENCES', 'ON', 'UPDATE', 'DELETE', 'SET', 'NO', 'ACTION',
          'RESTRICT', 'CASCADE', 'GENERATED', 'AS', 'IDENTITY', 'ALWAYS', 'BY', 'START',
-         'INCREMENT', 'NOW', 'TRUE', 'FALSE',)
+         'INCREMENT', 'NOW',)
 
     precedence = Expr.precedence + (
         ('left', 'OR'),

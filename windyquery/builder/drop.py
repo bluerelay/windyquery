@@ -4,7 +4,7 @@ from ._schema_base import SchemaBase
 class Drop(SchemaBase):
 
     def drop(self, *items: str):
-        self.schema_collector.drop(*items)
+        self.collector.drop(*items)
         return self
 
     def build_drop(self, data):

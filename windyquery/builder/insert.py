@@ -20,6 +20,13 @@ class Insert(CrudBase):
         self.collector.insert(columns, values)
         return self
 
+    def on_conflict(self, *items):
+        if len(items) < 2:
+            raise UserWarning(
+                'on_conflict requires at least 2 inputs: target and action')
+        self.collector.on_conflict(*items)
+        return self
+
     def build_insert(self, data):
         # TABLE
         sql = f'INSERT INTO {data["TABLE"]}'
@@ -35,6 +42,11 @@ class Insert(CrudBase):
                     f'different inserts found: {key} and {ins["key"]}')
             inserts.append(ins['values'])
         sql += ' ' + ', '.join(inserts)
+        # ON CONFLICT
+        if 'ON_CONFLICT' in data:
+            target = data['ON_CONFLICT']['target']
+            action = data['ON_CONFLICT']['action']
+            sql += f' ON CONFLICT {target} {action}'
         # RETURNING
         if 'RETURNING' in data:
             items = data['RETURNING']

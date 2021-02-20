@@ -1,5 +1,8 @@
 from typing import Any, Tuple
 import asyncpg
+
+from windyquery.collector import Collector
+from windyquery.combiner import Combiner
 from windyquery.connection import Connection
 from windyquery.listener import Listener
 from .select import Select
@@ -23,8 +26,8 @@ class DB(Select, Update, Insert, Delete, Create, Drop, Alter, Raw):
         self._reset()
 
     def _reset(self):
-        self._reset_crud()
-        self._reset_schema()
+        self.collector = Collector()
+        self.combiner = Combiner(self.collector)
         self.pool = None
 
     def _get_pool(self):
@@ -39,10 +42,10 @@ class DB(Select, Update, Insert, Delete, Create, Drop, Alter, Raw):
         args = []
         if self.mode == 'crud':
             sql, args = self.build_crud()
-            self._reset_crud()
+            self._reset()
         elif self.mode == 'schema':
             sql = self.build_schema()
-            self._reset_schema()
+            self._reset()
         elif self.mode == 'raw':
             sql, args = self.build_raw()
         else:

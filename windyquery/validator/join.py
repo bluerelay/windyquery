@@ -15,7 +15,7 @@ class Join(Expr):
     # rules
     _start = 'join'
 
-    precedence = (
+    precedence = Expr.precedence + (
         ('left', 'OR'),
         ('left', 'AND'),
     )

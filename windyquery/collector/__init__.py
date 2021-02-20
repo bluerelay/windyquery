@@ -15,17 +15,18 @@ from .schema import Schema
 from .create import Create
 from .drop import Drop
 from .alter import Alter
+from .on_conflict import OnConflict
 
 
 tokens = (
     'START_SELECT', 'START_UPDATE', 'START_INSERT', 'START_DELETE', 'START_CREATE', 'START_DROP', 'START_ALTER',
     'TABLE', 'SELECT', 'WHERE', 'LIMIT', 'OFFSET', 'GROUP_BY', 'ORDER_BY', 'JOIN', 'UPDATE',
     'FROM_TABLE', 'INSERT', 'RETURNING', 'DELETE', 'SCHEMA', 'CREATE', 'DROP',
-    'ALTER',
+    'ALTER', 'ON_CONFLICT',
 )
 
 
 class Collector(Table, Select, Where, Limit, Offset, GroupBy, OrderBy, Join, Update, FromTable, Insert,
-                Returning, Delete, Schema, Create, Drop, Alter):
+                Returning, Delete, Schema, Create, Drop, Alter, OnConflict):
     """collect user input"""
     pass

@@ -14,6 +14,10 @@ class InsertStmt:
     def p_insert_returning(self, p):
         p.lexer.append('RETURNING', p[1], 1)
 
+    @_rule('insert_stmt : ON_CONFLICT')
+    def p_insert_on_conflict(self, p):
+        p.lexer.append('ON_CONFLICT', p[1], 1)
+
     @_rule('''insert_stmts : insert_stmt insert_stmts
                            | insert_stmt''')
     def p_insert_stmts(self, p):

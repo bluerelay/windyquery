@@ -97,3 +97,52 @@ def test_insert2(db: DB):
         db.table('cards').where('id', rows[0]['id']).delete().returning())
     assert len(rows) == 1
     assert rows[0]['id'] == cardId
+
+
+def test_insert3(db: DB):
+    insertId = 1000
+    email = 'email1000@test.com'
+
+    # first insert a record
+    async def insert_fn():
+        results = await db.table('users').insert({
+            'id': insertId,
+            'email': email,
+            'password': 'pwd',
+            'admin': None
+        }).returning('id', 'email')
+        return results
+    rows = loop.run_until_complete(insert_fn())
+    assert len(rows) == 1
+    assert rows[0]['email'] == email
+
+    # insert the same record with on conflic do nothing
+    async def insert_fn2():
+        results = await db.table('users').insert({
+            'id': insertId,
+            'email': f'{email} x2',
+            'password': 'pwd',
+            'admin': None
+        }).on_conflict('(id)', 'DO NOTHING').returning('id', 'email')
+        return results
+    rows = loop.run_until_complete(insert_fn2())
+    assert len(rows) == 0
+
+    # insert the same record with on conflic do update
+    async def insert_fn3():
+        results = await db.table('users AS u').insert({
+            'id': insertId,
+            'email': f'{email} x3',
+            'password': 'pwd',
+            'admin': None
+        }).on_conflict('ON CONSTRAINT users_pkey', "DO UPDATE SET email = EXCLUDED.email || ' (formerly ' || u.email || ')'").\
+            returning('id', 'email')
+        return results
+    rows = loop.run_until_complete(insert_fn3())
+    assert len(rows) == 1
+    assert rows[0]['email'] == f'{email} x3 (formerly {email})'
+
+    rows = loop.run_until_complete(
+        db.table('users').where('id', insertId).delete().returning())
+    assert len(rows) == 1
+    assert rows[0]['id'] == insertId

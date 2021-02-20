@@ -131,6 +131,24 @@ await db.table('users').insert(
     {'id': 2, 'name': 'Jerry'},
     {'id': 3, 'name': 'DEFAULT'}
 ).returning()
+
+# INSERT INTO users (id, name) VALUES
+#   (1, 'Tom')
+#   ON CONFLICT (id) DO NOTHING
+await db.table('users').insert(
+    {'id': 1, 'name': 'Tom'},
+).on_conflict('(id)', 'DO NOTHING')
+
+# INSERT INTO users As u (id, name) VALUES
+#   (1, 'Tom')
+#   ON CONFLICT ON CONSTRAINT users_pkey
+#   DO UPDATE SET name = EXCLUDED.name || ' (formerly ' || u.name || ')'
+await db.table('users AS u').insert(
+    {'id': 1, 'name': 'Tom'},
+).on_conflict(
+    'ON CONSTRAINT users_pkey',
+    "DO UPDATE SET name = EXCLUDED.name || ' (formerly ' || u.name || ')'"
+)        
 ```
 
 #### UPDATE
@@ -145,11 +163,11 @@ await db.table('users').update('name = orders.name').\
     from_table('orders').\
     where('orders.user_id = users.id')
 
-# UPDATE users SET name = products.name
+# UPDATE users SET name = products.name, purchase = products.name, is_paid = TRUE
 #   FROM orders
 #   JOIN products ON orders.product_id = products.id
 #   WHERE orders.user_id = users.id
-await db.table('users').update('name = product.name').\
+await db.table('users').update('name = product.name, purchase = products.name, is_paid = ?', True).\
     from_table('orders').\
     join('products', 'orders.product_id', '=', 'products.id').\
     where('orders.user_id = users.id')
@@ -241,6 +259,9 @@ await db.schema('TABLE users').alter('DROP address')
 
 # CREATE INDEX idx_email ON users (name, email)
 await db.schema('INDEX idx_email ON users').create('name', 'email')
+
+# CREATE UNIQUE INDEX unique_name ON users(name) WHERE soft_deleted = FALSE
+await db.schema('UNIQUE INDEX unique_name ON users').create('name',).where('soft_deleted', False)
 
 # DROP INDEX idx_email CASCADE
 await db.schema('INDEX idx_email').drop('CASCADE')

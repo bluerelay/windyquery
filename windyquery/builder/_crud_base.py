@@ -6,10 +6,8 @@ from windyquery.combiner import Combiner
 
 class CrudBase:
     """Base class for crud builder methods"""
-
-    def _reset_crud(self):
-        self.collector = Collector()
-        self.combiner = Combiner(self.collector)
+    collector: Collector
+    combiner: Combiner
 
     def table(self, name: str):
         self.mode = 'crud'
