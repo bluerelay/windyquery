@@ -48,7 +48,7 @@ It can be scheduled to run by all [asyncio](https://docs.python.org/3/library/as
 #### Build a SQL and execute it
 ```python
 async def main(db):
-    # SELECT * FROM users
+    # SELECT id, name FROM users
     users = await db.table('users').select('id', 'name')
     print(users[0]['name'])
 
@@ -195,7 +195,8 @@ The DB instance can also be used to migrate database schema.
 #    is_admin      boolean not null default false,
 #    address       jsonb,
 #    payday        integer not null,
-#    CONSTRAINT check(payday > 0 and payday < 8)
+#    CONSTRAINT unique_email UNIQUE(group_id, email)
+#    check(payday > 0 and payday < 8)
 #)
 await db.schema('TABLE users').create(
     'id            serial PRIMARY KEY',
@@ -205,8 +206,8 @@ await db.schema('TABLE users').create(
     'is_admin      boolean not null default false',
     'address       jsonb',
     'payday        integer not null',
-    'CONSTRAINT    UNIQUE(group_id, email)',
-    'CONSTRAINT check(payday > 0 and payday < 8)',
+    'CONSTRAINT unique_email UNIQUE(group_id, email)',
+    'check(payday > 0 and payday < 8)',
 )
 
 # CREATE TABLE accounts LIKE users
@@ -382,7 +383,7 @@ async with db.listen('my_table') as listener:
 ```
 
 ### Tests
-Windyquery includes [tests](https://github.com/bluerelay/windyquery/tree/master/windyquery/tests). These tests are also good examples on how to use this library.
+Windyquery includes [tests](https://github.com/bluerelay/windyquery/tree/master/windyquery/tests). These tests are also served as examples on how to use this library.
 
 #### Running tests
 Install pytest to run the included tests,
