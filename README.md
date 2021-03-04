@@ -382,6 +382,201 @@ async with db.listen('my_table') as listener:
         print(result)
 ```
 
+### RRULE
+Windyquery has a rrule function that can "expand" a rrule string into it occurrences (a list of datetimes) by using [dateutil](https://github.com/dateutil/dateutil). A values CTE is prepared from the rrule occurrences, which can be further used by other querries.
+
+#### A simple rrule example
+```python
+rruleStr = """
+DTSTART:20210303T100000Z
+RRULE:FREQ=DAILY;COUNT=5
+"""
+
+# WITH my_rrules ("rrule") AS 
+# (VALUES
+#   ('2021-03-03 10:00:00+00:00'::timestamptz),
+#   ('2021-03-04 10:00:00+00:00'::timestamptz),
+#   ('2021-03-05 10:00:00+00:00'::timestamptz),
+#   ('2021-03-06 10:00:00+00:00'::timestamptz),
+#   ('2021-03-07 10:00:00+00:00'::timestamptz)
+# )
+# SELECT * FROM my_rrules
+await db.rrule('my_rrules', {'rrule': rruleStr}).table('my_rrules').select()
+```
+
+#### More than one rrules
+```python
+rruleStr1 = """
+DTSTART:20210303T100000Z
+RRULE:FREQ=DAILY;COUNT=5
+"""
+
+rruleStr2 = """
+DTSTART:20210303T100000Z
+RRULE:FREQ=DAILY;INTERVAL=10;COUNT=3
+RRULE:FREQ=DAILY;INTERVAL=5;COUNT=3
+"""
+
+# WITH my_rrules ("rrule") AS 
+# (VALUES
+#   ('2021-03-03 10:00:00+00:00'::timestamptz),
+#   ('2021-03-04 10:00:00+00:00'::timestamptz),
+#   ('2021-03-05 10:00:00+00:00'::timestamptz),
+#   ('2021-03-06 10:00:00+00:00'::timestamptz),
+#   ('2021-03-07 10:00:00+00:00'::timestamptz),
+#   ('2021-03-03 10:00:00+00:00'::timestamptz),
+#   ('2021-03-08 10:00:00+00:00'::timestamptz),
+#   ('2021-03-13 10:00:00+00:00'::timestamptz),
+#   ('2021-03-23 10:00:00+00:00'::timestamptz)
+# )
+# SELECT * FROM my_rrules
+)
+await db.rrule('my_rrules', {
+        'rrule': rruleStr1
+    }, {
+        'rrule': rruleStr2
+    }).table('my_rrules').select()
+```
+
+#### Join rrule with other tables
+```python
+import datetime
+
+rruleStr1 = """
+DTSTART:20210303T100000Z
+RRULE:FREQ=DAILY;COUNT=5
+"""
+
+rruleStr2 = """
+DTSTART:20210303T100000Z
+RRULE:FREQ=DAILY;INTERVAL=10;COUNT=3
+RRULE:FREQ=DAILY;INTERVAL=5;COUNT=3
+"""
+
+# WITH task_rrules ("task_id", "rrule") AS 
+# (VALUES
+#   (1, '2021-03-03 10:00:00+00:00'::timestamptz),
+#   (1, '2021-03-04 10:00:00+00:00'::timestamptz),
+#   (1, '2021-03-05 10:00:00+00:00'::timestamptz),
+#   (1, '2021-03-06 10:00:00+00:00'::timestamptz),
+#   (1, '2021-03-07 10:00:00+00:00'::timestamptz),
+#   (2, '2021-03-03 10:00:00+00:00'::timestamptz),
+#   (2, '2021-03-08 10:00:00+00:00'::timestamptz),
+#   (2, '2021-03-13 10:00:00+00:00'::timestamptz),
+#   (2, '2021-03-23 10:00:00+00:00'::timestamptz)
+# )
+# SELECT task_rrules.rrule, tasks.name
+# FROM task_rrules
+# JOIN tasks ON tasks.id = task_rrules.task_id
+# WHERE
+#   rrule > '2021-03-05 10:00:00+00:00' AND
+#   rrule < '2021-03-08 10:00:00+00:00'
+await db.rrule('task_rrules', {
+        'task_id': 1, 'rrule': rruleStr1
+    }, {
+        'task_id': 2, 'rrule': rruleStr2
+    }).table('task_rrules').
+    join('tasks', 'tasks.id', '=', 'task_rrules.task_id').
+    where('rrule > ? AND rrule < ?',
+        datetime.datetime(2021, 3, 5, 10, 0,
+                tzinfo=datetime.timezone.utc),
+        datetime.datetime(2021, 3, 8, 10, 0,
+                tzinfo=datetime.timezone.utc),
+    ).select('task_rrules.rrule', 'tasks.name')
+```
+
+#### Using rrule in update
+```python
+import datetime
+
+rruleStr1 = """
+DTSTART:20210303T100000Z
+RRULE:FREQ=DAILY;COUNT=5
+"""
+
+rruleStr2 = """
+DTSTART:20210303T100000Z
+RRULE:FREQ=DAILY;INTERVAL=10;COUNT=3
+RRULE:FREQ=DAILY;INTERVAL=5;COUNT=3
+"""
+
+# WITH task_rrules ("task_id", "rrule") AS 
+# (VALUES
+#   (1, '2021-03-03 10:00:00+00:00'::timestamptz),
+#   (1, '2021-03-04 10:00:00+00:00'::timestamptz),
+#   (1, '2021-03-05 10:00:00+00:00'::timestamptz),
+#   (1, '2021-03-06 10:00:00+00:00'::timestamptz),
+#   (1, '2021-03-07 10:00:00+00:00'::timestamptz),
+#   (2, '2021-03-03 10:00:00+00:00'::timestamptz),
+#   (2, '2021-03-08 10:00:00+00:00'::timestamptz),
+#   (2, '2021-03-13 10:00:00+00:00'::timestamptz),
+#   (2, '2021-03-23 10:00:00+00:00'::timestamptz)
+# )
+# UPDATE tasks SET result = 'done'
+# FROM task_rrules
+# WHERE task_rrules.task_id = tasks.id
+await db.rrule('task_rrules', {
+        'task_id': 1, 'rrule': rruleStr1
+    }, {
+        'task_id': 2, 'rrule': rruleStr2
+    }).table('tasks').update("result = 'done'").
+    from_table('task_rrules').
+    where('task_rrules.task_id = tasks.id')
+```
+
+#### Using rrule with raw method
+```python
+import datetime
+
+rruleStr1 = """
+DTSTART:20210303T100000Z
+RRULE:FREQ=DAILY;COUNT=5
+"""
+
+rruleStr2 = """
+DTSTART:20210303T100000Z
+RRULE:FREQ=DAILY;INTERVAL=10;COUNT=3
+RRULE:FREQ=DAILY;INTERVAL=5;COUNT=3
+"""
+
+# WITH task_rrules ("task_id", "rrule") AS 
+# (VALUES
+#   (1, '2021-03-03 10:00:00+00:00'::timestamptz),
+#   (1, '2021-03-04 10:00:00+00:00'::timestamptz),
+#   (1, '2021-03-05 10:00:00+00:00'::timestamptz),
+#   (1, '2021-03-06 10:00:00+00:00'::timestamptz),
+#   (1, '2021-03-07 10:00:00+00:00'::timestamptz),
+#   (2, '2021-03-03 10:00:00+00:00'::timestamptz),
+#   (2, '2021-03-08 10:00:00+00:00'::timestamptz),
+#   (2, '2021-03-13 10:00:00+00:00'::timestamptz),
+#   (2, '2021-03-23 10:00:00+00:00'::timestamptz)
+# )
+# DELETE FROM tasks
+# WHERE EXISTS(
+#   SELECT 1 FROM task_rrules
+#   WHERE
+#     task_id = tasks.id AND
+#     rrule > '2021-03-20 10:00:00+00:00'
+# )
+# RETURNING id, task_id
+await db.rrule('task_rrules', {
+        'task_id': 1, 'rrule': rruleStr1
+    }, {
+        'task_id': 3, 'rrule': rruleStr2
+    }).raw("""
+        DELETE FROM tasks
+        WHERE EXISTS(
+            SELECT 1 FROM task_rrules
+            WHERE 
+                task_id = tasks.id AND
+                rrule > $1
+        )
+        RETURNING id, task_id
+    """, datetime.datetime(2021, 3, 20, 10, 0,
+                tzinfo=datetime.timezone.utc))
+```
+
+
 ### Tests
 Windyquery includes [tests](https://github.com/bluerelay/windyquery/tree/master/windyquery/tests). These tests are also served as examples on how to use this library.
 

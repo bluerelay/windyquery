@@ -46,4 +46,14 @@ CREATE TRIGGER cards_trigger AFTER INSERT ON cards FOR EACH ROW EXECUTE PROCEDUR
 
 CREATE TABLE students ("id" serial PRIMARY KEY, "firstname" TEXT, "lastname" TEXT);
 
+CREATE TABLE tasks ("id" serial PRIMARY KEY, "name" TEXT);
+INSERT INTO tasks ("id", "name") VALUES
+    (1, 'tax return'),
+    (2, 'pick up kids');
+
+CREATE TABLE task_results ("id" serial PRIMARY KEY, "task_id" INTEGER, "result" TEXT);
+INSERT INTO task_results ("id", "task_id", "result") VALUES
+    (1, 1, ''),
+    (2, 2, '');
+
 CREATE SCHEMA test1;

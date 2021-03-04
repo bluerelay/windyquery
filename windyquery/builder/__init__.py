@@ -13,9 +13,10 @@ from .create import Create
 from .drop import Drop
 from .alter import Alter
 from .raw import Raw
+from .rrule import Rrule
 
 
-class DB(Select, Update, Insert, Delete, Create, Drop, Alter, Raw):
+class DB(Select, Update, Insert, Delete, Create, Drop, Alter, Rrule, Raw):
     """DB class"""
 
     def __init__(self):
@@ -42,14 +43,13 @@ class DB(Select, Update, Insert, Delete, Create, Drop, Alter, Raw):
         args = []
         if self.mode == 'crud':
             sql, args = self.build_crud()
-            self._reset()
         elif self.mode == 'schema':
             sql = self.build_schema()
-            self._reset()
         elif self.mode == 'raw':
             sql, args = self.build_raw()
         else:
             raise UserWarning('the sql build is incomplete')
+        self._reset()
         return str(sql), args
 
     async def exec(self):

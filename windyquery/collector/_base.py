@@ -59,6 +59,14 @@ class StartAlterToken(LexToken):
         self.lexpos = 0
 
 
+class StartRawToken(LexToken):
+    def __init__(self):
+        self.type = 'START_RAW'
+        self.value = 'START_RAW'
+        self.lineno = 0
+        self.lexpos = 0
+
+
 class Base:
     """base class for Markers"""
 

@@ -34,6 +34,9 @@ class CrudBase:
     def build_delete(self, _):
         return None, None
 
+    def build_rrule(self, _):
+        return None, None
+
     def build_crud(self):
         result = self.combiner.run()
         if result['_id'] == 'select':
@@ -48,4 +51,7 @@ class CrudBase:
             raise UserWarning(result['message'])
         else:
             raise Exception(f"not implemented: {result['_id']!r}")
+        # RRULE
+        if 'RRULE' in result:
+            sql = self.build_rrule(result['RRULE']) + ' ' + sql
         return sql, args

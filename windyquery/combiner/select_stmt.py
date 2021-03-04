@@ -34,6 +34,10 @@ class SelectStmt:
     def p_select_table(self, p):
         p.lexer.append('TABLE', p[1], 1)
 
+    @_rule('select_stmt : RRULE')
+    def p_select_rrule(self, p):
+        p.lexer.append('RRULE', p[1])
+
     @_rule('''select_stmts : select_stmt
                            | select_stmt select_stmts''')
     def p_select_stmts(self, p):

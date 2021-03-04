@@ -1,4 +1,5 @@
 from typing import List, Any
+from dateutil.tz import UTC
 from windyquery.ctx import Ctx
 from windyquery.utils import process_value
 
@@ -99,3 +100,29 @@ class Validator:
 
     def validate_conflict_action(self, s: str, ctx: Ctx) -> str:
         return _conflict_action.parse(s, ctx)
+
+    def validate_rrule_columns(self, columns: List[str]) -> str:
+        cols = [_field.sanitize_identifier(col) for col in columns]
+        return '(' + ', '.join(cols) + ')'
+
+    def validate_rrule_values(self, rrulepos: int, values: List[Any], ctx: Ctx) -> str:
+        row = []
+        args = []
+        for pos, val in enumerate(values):
+            if pos != rrulepos:
+                val, p = process_value(val)
+                if p is not None:
+                    args.append(p)
+                row.append(str(val))
+            else:
+                row.append(None)
+        results = []
+        # set a limit in case the rrule is unbound
+        for tm in values[rrulepos][:100000]:
+            row[rrulepos], _ = process_value(str(tm.astimezone(UTC)))
+            nestedCtx = Ctx(ctx.param_offset + len(ctx.args), args)
+            rowTmpl = '(' + _value_list.parse(','.join(row), nestedCtx) + ')'
+            results.append(rowTmpl.replace(
+                row[rrulepos], f'{row[rrulepos]}::timestamptz'))
+            ctx.args.extend(args)
+        return ', '.join(results)

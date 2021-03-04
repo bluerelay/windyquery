@@ -17,7 +17,8 @@ class Base:
                   | START_DELETE delete_stmts
                   | START_CREATE create_stmts
                   | START_DROP drop_stmts
-                  | START_ALTER alter_stmts''')
+                  | START_ALTER alter_stmts
+                  | START_RAW raw_stmts''')
     def p_sql(self, p):
         if p[1] == 'START_SELECT':
             p.lexer.set_id('select')
@@ -40,6 +41,9 @@ class Base:
         elif p[1] == 'START_ALTER':
             p.lexer.set_id('alter')
             p.lexer.required('SCHEMA', 'ALTER')
+        elif p[1] == 'START_RAW':
+            p.lexer.set_id('raw')
+            p.lexer.required('RAW')
         else:
             raise UserWarning(f'not implemented: {p[1]}')
 

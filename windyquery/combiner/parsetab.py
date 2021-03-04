@@ -6,9 +6,9 @@ _tabversion = '3.10'
 
 _lr_method = 'LALR'
 
-_lr_signature = 'sqlALTER CREATE DELETE DROP FROM_TABLE GROUP_BY INSERT JOIN LIMIT OFFSET ON_CONFLICT ORDER_BY RETURNING SCHEMA SELECT START_ALTER START_CREATE START_DELETE START_DROP START_INSERT START_SELECT START_UPDATE TABLE UPDATE WHEREalter_stmt : SCHEMAcreate_stmt : SCHEMAdelete_stmt : TABLEdrop_stmt : SCHEMAinsert_stmt : TABLEselect_stmt : WHEREupdate_stmt : TABLEalter_stmt : ALTERcreate_stmt : CREATEdelete_stmt : DELETEdrop_stmt : DROPinsert_stmt : INSERTselect_stmt : ORDER_BYupdate_stmt : UPDATEalter_stmts : alter_stmt alter_stmts\n                          | alter_stmtcreate_stmt : WHEREdelete_stmt : WHEREdrop_stmts : drop_stmt drop_stmts\n                         | drop_stmtinsert_stmt : RETURNINGselect_stmt : GROUP_BYupdate_stmt : FROM_TABLEsql : START_SELECT select_stmts\n                  | START_UPDATE update_stmts\n                  | START_INSERT insert_stmts\n                  | START_DELETE delete_stmts\n                  | START_CREATE create_stmts\n                  | START_DROP drop_stmts\n                  | START_ALTER alter_stmtscreate_stmts : create_stmt create_stmts\n                           | create_stmtdelete_stmt : RETURNINGinsert_stmt : ON_CONFLICTselect_stmt : JOINupdate_stmt : JOINdelete_stmts : delete_stmt delete_stmts\n                           | delete_stmtinsert_stmts : insert_stmt insert_stmts\n                           | insert_stmtselect_stmt : LIMITupdate_stmt : WHEREselect_stmt : OFFSETupdate_stmts : update_stmt update_stmts\n                           | update_stmtselect_stmt : SELECTselect_stmt : TABLEselect_stmts : select_stmt\n                           | select_stmt select_stmts'
+_lr_signature = 'sqlALTER CREATE DELETE DROP FROM_TABLE GROUP_BY INSERT JOIN LIMIT OFFSET ON_CONFLICT ORDER_BY RAW RETURNING RRULE SCHEMA SELECT START_ALTER START_CREATE START_DELETE START_DROP START_INSERT START_RAW START_SELECT START_UPDATE TABLE UPDATE WHEREalter_stmt : SCHEMAcreate_stmt : SCHEMAdelete_stmt : TABLEdrop_stmt : SCHEMAinsert_stmt : TABLEraw_stmt : RAWselect_stmt : WHEREupdate_stmt : TABLEalter_stmt : ALTERcreate_stmt : CREATEdelete_stmt : DELETEdrop_stmt : DROPinsert_stmt : INSERTraw_stmt : RRULEselect_stmt : ORDER_BYupdate_stmt : UPDATEalter_stmts : alter_stmt alter_stmts\n                          | alter_stmtcreate_stmt : WHEREdelete_stmt : WHEREdrop_stmts : drop_stmt drop_stmts\n                         | drop_stmtinsert_stmt : RETURNINGraw_stmts : raw_stmt\n                        | raw_stmt raw_stmtsselect_stmt : GROUP_BYupdate_stmt : FROM_TABLEsql : START_SELECT select_stmts\n                  | START_UPDATE update_stmts\n                  | START_INSERT insert_stmts\n                  | START_DELETE delete_stmts\n                  | START_CREATE create_stmts\n                  | START_DROP drop_stmts\n                  | START_ALTER alter_stmts\n                  | START_RAW raw_stmtscreate_stmts : create_stmt create_stmts\n                           | create_stmtdelete_stmt : RETURNINGinsert_stmt : ON_CONFLICTselect_stmt : JOINupdate_stmt : JOINdelete_stmts : delete_stmt delete_stmts\n                           | delete_stmtinsert_stmts : insert_stmt insert_stmts\n                           | insert_stmtselect_stmt : LIMITupdate_stmt : WHEREselect_stmt : OFFSETupdate_stmt : RRULEselect_stmt : SELECTupdate_stmts : update_stmt update_stmts\n                           | update_stmtselect_stmt : TABLEselect_stmt : RRULEselect_stmts : select_stmt\n                           | select_stmt select_stmts'
     
-_lr_action_items = {'START_SELECT':([0,],[2,]),'START_UPDATE':([0,],[3,]),'START_INSERT':([0,],[4,]),'START_DELETE':([0,],[5,]),'START_CREATE':([0,],[6,]),'START_DROP':([0,],[7,]),'START_ALTER':([0,],[8,]),'$end':([1,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,],[0,-24,-48,-6,-13,-22,-35,-41,-43,-46,-47,-25,-45,-7,-14,-23,-36,-42,-26,-40,-5,-12,-21,-34,-27,-38,-3,-10,-18,-33,-28,-32,-2,-9,-17,-29,-20,-4,-11,-30,-16,-1,-8,-49,-44,-39,-37,-31,-19,-15,]),'WHERE':([2,3,5,6,10,11,12,13,14,15,16,17,18,20,21,22,23,24,25,33,34,35,36,37,39,40,41,42,],[11,25,36,42,11,-6,-13,-22,-35,-41,-43,-46,-47,25,-7,-14,-23,-36,-42,36,-3,-10,-18,-33,42,-2,-9,-17,]),'ORDER_BY':([2,10,11,12,13,14,15,16,17,18,],[12,12,-6,-13,-22,-35,-41,-43,-46,-47,]),'GROUP_BY':([2,10,11,12,13,14,15,16,17,18,],[13,13,-6,-13,-22,-35,-41,-43,-46,-47,]),'JOIN':([2,3,10,11,12,13,14,15,16,17,18,20,21,22,23,24,25,],[14,24,14,-6,-13,-22,-35,-41,-43,-46,-47,24,-7,-14,-23,-36,-42,]),'LIMIT':([2,10,11,12,13,14,15,16,17,18,],[15,15,-6,-13,-22,-35,-41,-43,-46,-47,]),'OFFSET':([2,10,11,12,13,14,15,16,17,18,],[16,16,-6,-13,-22,-35,-41,-43,-46,-47,]),'SELECT':([2,10,11,12,13,14,15,16,17,18,],[17,17,-6,-13,-22,-35,-41,-43,-46,-47,]),'TABLE':([2,3,4,5,10,11,12,13,14,15,16,17,18,20,21,22,23,24,25,27,28,29,30,31,33,34,35,36,37,],[18,21,28,34,18,-6,-13,-22,-35,-41,-43,-46,-47,21,-7,-14,-23,-36,-42,28,-5,-12,-21,-34,34,-3,-10,-18,-33,]),'UPDATE':([3,20,21,22,23,24,25,],[22,22,-7,-14,-23,-36,-42,]),'FROM_TABLE':([3,20,21,22,23,24,25,],[23,23,-7,-14,-23,-36,-42,]),'INSERT':([4,27,28,29,30,31,],[29,29,-5,-12,-21,-34,]),'RETURNING':([4,5,27,28,29,30,31,33,34,35,36,37,],[30,37,30,-5,-12,-21,-34,37,-3,-10,-18,-33,]),'ON_CONFLICT':([4,27,28,29,30,31,],[31,31,-5,-12,-21,-34,]),'DELETE':([5,33,34,35,36,37,],[35,35,-3,-10,-18,-33,]),'SCHEMA':([6,7,8,39,40,41,42,44,45,46,48,49,50,],[40,45,49,40,-2,-9,-17,45,-4,-11,49,-1,-8,]),'CREATE':([6,39,40,41,42,],[41,41,-2,-9,-17,]),'DROP':([7,44,45,46,],[46,46,-4,-11,]),'ALTER':([8,48,49,50,],[50,50,-1,-8,]),}
+_lr_action_items = {'START_SELECT':([0,],[2,]),'START_UPDATE':([0,],[3,]),'START_INSERT':([0,],[4,]),'START_DELETE':([0,],[5,]),'START_CREATE':([0,],[6,]),'START_DROP':([0,],[7,]),'START_ALTER':([0,],[8,]),'START_RAW':([0,],[9,]),'$end':([1,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,],[0,-28,-55,-7,-15,-26,-40,-46,-48,-50,-53,-54,-29,-52,-8,-16,-27,-41,-47,-49,-30,-45,-5,-13,-23,-39,-31,-43,-3,-11,-20,-38,-32,-37,-2,-10,-19,-33,-22,-4,-12,-34,-18,-1,-9,-35,-24,-6,-14,-56,-51,-44,-42,-36,-21,-17,-25,]),'WHERE':([2,3,5,6,11,12,13,14,15,16,17,18,19,20,22,23,24,25,26,27,28,36,37,38,39,40,42,43,44,45,],[12,27,39,45,12,-7,-15,-26,-40,-46,-48,-50,-53,-54,27,-8,-16,-27,-41,-47,-49,39,-3,-11,-20,-38,45,-2,-10,-19,]),'ORDER_BY':([2,11,12,13,14,15,16,17,18,19,20,],[13,13,-7,-15,-26,-40,-46,-48,-50,-53,-54,]),'GROUP_BY':([2,11,12,13,14,15,16,17,18,19,20,],[14,14,-7,-15,-26,-40,-46,-48,-50,-53,-54,]),'JOIN':([2,3,11,12,13,14,15,16,17,18,19,20,22,23,24,25,26,27,28,],[15,26,15,-7,-15,-26,-40,-46,-48,-50,-53,-54,26,-8,-16,-27,-41,-47,-49,]),'LIMIT':([2,11,12,13,14,15,16,17,18,19,20,],[16,16,-7,-15,-26,-40,-46,-48,-50,-53,-54,]),'OFFSET':([2,11,12,13,14,15,16,17,18,19,20,],[17,17,-7,-15,-26,-40,-46,-48,-50,-53,-54,]),'SELECT':([2,11,12,13,14,15,16,17,18,19,20,],[18,18,-7,-15,-26,-40,-46,-48,-50,-53,-54,]),'TABLE':([2,3,4,5,11,12,13,14,15,16,17,18,19,20,22,23,24,25,26,27,28,30,31,32,33,34,36,37,38,39,40,],[19,23,31,37,19,-7,-15,-26,-40,-46,-48,-50,-53,-54,23,-8,-16,-27,-41,-47,-49,31,-5,-13,-23,-39,37,-3,-11,-20,-38,]),'RRULE':([2,3,9,11,12,13,14,15,16,17,18,19,20,22,23,24,25,26,27,28,55,56,57,],[20,28,57,20,-7,-15,-26,-40,-46,-48,-50,-53,-54,28,-8,-16,-27,-41,-47,-49,57,-6,-14,]),'UPDATE':([3,22,23,24,25,26,27,28,],[24,24,-8,-16,-27,-41,-47,-49,]),'FROM_TABLE':([3,22,23,24,25,26,27,28,],[25,25,-8,-16,-27,-41,-47,-49,]),'INSERT':([4,30,31,32,33,34,],[32,32,-5,-13,-23,-39,]),'RETURNING':([4,5,30,31,32,33,34,36,37,38,39,40,],[33,40,33,-5,-13,-23,-39,40,-3,-11,-20,-38,]),'ON_CONFLICT':([4,30,31,32,33,34,],[34,34,-5,-13,-23,-39,]),'DELETE':([5,36,37,38,39,40,],[38,38,-3,-11,-20,-38,]),'SCHEMA':([6,7,8,42,43,44,45,47,48,49,51,52,53,],[43,48,52,43,-2,-10,-19,48,-4,-12,52,-1,-9,]),'CREATE':([6,42,43,44,45,],[44,44,-2,-10,-19,]),'DROP':([7,47,48,49,],[49,49,-4,-12,]),'ALTER':([8,51,52,53,],[53,53,-1,-9,]),'RAW':([9,55,56,57,],[56,56,-6,-14,]),}
 
 _lr_action = {}
 for _k, _v in _lr_action_items.items():
@@ -17,7 +17,7 @@ for _k, _v in _lr_action_items.items():
       _lr_action[_x][_k] = _y
 del _lr_action_items
 
-_lr_goto_items = {'sql':([0,],[1,]),'select_stmts':([2,10,],[9,51,]),'select_stmt':([2,10,],[10,10,]),'update_stmts':([3,20,],[19,52,]),'update_stmt':([3,20,],[20,20,]),'insert_stmts':([4,27,],[26,53,]),'insert_stmt':([4,27,],[27,27,]),'delete_stmts':([5,33,],[32,54,]),'delete_stmt':([5,33,],[33,33,]),'create_stmts':([6,39,],[38,55,]),'create_stmt':([6,39,],[39,39,]),'drop_stmts':([7,44,],[43,56,]),'drop_stmt':([7,44,],[44,44,]),'alter_stmts':([8,48,],[47,57,]),'alter_stmt':([8,48,],[48,48,]),}
+_lr_goto_items = {'sql':([0,],[1,]),'select_stmts':([2,11,],[10,58,]),'select_stmt':([2,11,],[11,11,]),'update_stmts':([3,22,],[21,59,]),'update_stmt':([3,22,],[22,22,]),'insert_stmts':([4,30,],[29,60,]),'insert_stmt':([4,30,],[30,30,]),'delete_stmts':([5,36,],[35,61,]),'delete_stmt':([5,36,],[36,36,]),'create_stmts':([6,42,],[41,62,]),'create_stmt':([6,42,],[42,42,]),'drop_stmts':([7,47,],[46,63,]),'drop_stmt':([7,47,],[47,47,]),'alter_stmts':([8,51,],[50,64,]),'alter_stmt':([8,51,],[51,51,]),'raw_stmts':([9,55,],[54,65,]),'raw_stmt':([9,55,],[55,55,]),}
 
 _lr_goto = {}
 for _k, _v in _lr_goto_items.items():
@@ -32,6 +32,7 @@ _lr_productions = [
   ('delete_stmt -> TABLE','delete_stmt',1,'p_delete_table','delete_stmt.py',6),
   ('drop_stmt -> SCHEMA','drop_stmt',1,'p_drop_schema','drop_stmt.py',6),
   ('insert_stmt -> TABLE','insert_stmt',1,'p_insert_table','insert_stmt.py',6),
+  ('raw_stmt -> RAW','raw_stmt',1,'p_raw_raw','raw_stmt.py',6),
   ('select_stmt -> WHERE','select_stmt',1,'p_select_where','select_stmt.py',6),
   ('update_stmt -> TABLE','update_stmt',1,'p_update_table','update_stmt.py',6),
   ('alter_stmt -> ALTER','alter_stmt',1,'p_alter_alter','alter_stmt.py',10),
@@ -39,6 +40,7 @@ _lr_productions = [
   ('delete_stmt -> DELETE','delete_stmt',1,'p_delete_delete','delete_stmt.py',10),
   ('drop_stmt -> DROP','drop_stmt',1,'p_drop_drop','drop_stmt.py',10),
   ('insert_stmt -> INSERT','insert_stmt',1,'p_insert_insert','insert_stmt.py',10),
+  ('raw_stmt -> RRULE','raw_stmt',1,'p_raw_rrule','raw_stmt.py',10),
   ('select_stmt -> ORDER_BY','select_stmt',1,'p_select_order_by','select_stmt.py',10),
   ('update_stmt -> UPDATE','update_stmt',1,'p_update_update','update_stmt.py',10),
   ('alter_stmts -> alter_stmt alter_stmts','alter_stmts',2,'p_alter_stmts','alter_stmt.py',14),
@@ -48,6 +50,8 @@ _lr_productions = [
   ('drop_stmts -> drop_stmt drop_stmts','drop_stmts',2,'p_drop_stmts','drop_stmt.py',14),
   ('drop_stmts -> drop_stmt','drop_stmts',1,'p_drop_stmts','drop_stmt.py',15),
   ('insert_stmt -> RETURNING','insert_stmt',1,'p_insert_returning','insert_stmt.py',14),
+  ('raw_stmts -> raw_stmt','raw_stmts',1,'p_raw_stmts','raw_stmt.py',14),
+  ('raw_stmts -> raw_stmt raw_stmts','raw_stmts',2,'p_raw_stmts','raw_stmt.py',15),
   ('select_stmt -> GROUP_BY','select_stmt',1,'p_select_group_by','select_stmt.py',14),
   ('update_stmt -> FROM_TABLE','update_stmt',1,'p_update_from','update_stmt.py',14),
   ('sql -> START_SELECT select_stmts','sql',2,'p_sql','_base.py',15),
@@ -57,6 +61,7 @@ _lr_productions = [
   ('sql -> START_CREATE create_stmts','sql',2,'p_sql','_base.py',19),
   ('sql -> START_DROP drop_stmts','sql',2,'p_sql','_base.py',20),
   ('sql -> START_ALTER alter_stmts','sql',2,'p_sql','_base.py',21),
+  ('sql -> START_RAW raw_stmts','sql',2,'p_sql','_base.py',22),
   ('create_stmts -> create_stmt create_stmts','create_stmts',2,'p_create_stmts','create_stmt.py',18),
   ('create_stmts -> create_stmt','create_stmts',1,'p_create_stmts','create_stmt.py',19),
   ('delete_stmt -> RETURNING','delete_stmt',1,'p_delete_returning','delete_stmt.py',18),
@@ -70,10 +75,12 @@ _lr_productions = [
   ('select_stmt -> LIMIT','select_stmt',1,'p_select_limit','select_stmt.py',22),
   ('update_stmt -> WHERE','update_stmt',1,'p_update_where','update_stmt.py',22),
   ('select_stmt -> OFFSET','select_stmt',1,'p_select_offset','select_stmt.py',26),
-  ('update_stmts -> update_stmt update_stmts','update_stmts',2,'p_update_stmts','update_stmt.py',26),
-  ('update_stmts -> update_stmt','update_stmts',1,'p_update_stmts','update_stmt.py',27),
+  ('update_stmt -> RRULE','update_stmt',1,'p_update_rrule','update_stmt.py',26),
   ('select_stmt -> SELECT','select_stmt',1,'p_select_select','select_stmt.py',30),
+  ('update_stmts -> update_stmt update_stmts','update_stmts',2,'p_update_stmts','update_stmt.py',30),
+  ('update_stmts -> update_stmt','update_stmts',1,'p_update_stmts','update_stmt.py',31),
   ('select_stmt -> TABLE','select_stmt',1,'p_select_table','select_stmt.py',34),
-  ('select_stmts -> select_stmt','select_stmts',1,'p_select_stmts','select_stmt.py',38),
-  ('select_stmts -> select_stmt select_stmts','select_stmts',2,'p_select_stmts','select_stmt.py',39),
+  ('select_stmt -> RRULE','select_stmt',1,'p_select_rrule','select_stmt.py',38),
+  ('select_stmts -> select_stmt','select_stmts',1,'p_select_stmts','select_stmt.py',42),
+  ('select_stmts -> select_stmt select_stmts','select_stmts',2,'p_select_stmts','select_stmt.py',43),
 ]

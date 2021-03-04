@@ -3,9 +3,16 @@ class Raw:
 
     def raw(self, s: str, *args):
         self.mode = 'raw'
-        self.sql = s
-        self.args = list(args)
+        self.collector.raw(s, *args)
         return self
 
     def build_raw(self):
-        return self.sql, self.args
+        result = self.combiner.run()
+        if result['_id'] == 'error':
+            raise UserWarning(result['message'])
+        if 'RRULE' in result:
+            sql = self.build_rrule(
+                result['RRULE']) + ' ' + result['RAW']['sql']
+        else:
+            sql = result['RAW']['sql']
+        return sql, result['_params']

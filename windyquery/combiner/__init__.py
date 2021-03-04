@@ -8,9 +8,10 @@ from .delete_stmt import DeleteStmt
 from .create_stmt import CreateStmt
 from .drop_stmt import DropStmt
 from .alter_stmt import AlterStmt
+from .raw_stmt import RawStmt
 
 
-class RuleParser(Base, SelectStmt, UpdateStmt, InsertStmt, DeleteStmt, CreateStmt, DropStmt, AlterStmt):
+class RuleParser(Base, SelectStmt, UpdateStmt, InsertStmt, DeleteStmt, CreateStmt, DropStmt, AlterStmt, RawStmt):
     pass
 
 
