@@ -576,6 +576,36 @@ await db.rrule('task_rrules', {
                 tzinfo=datetime.timezone.utc))
 ```
 
+#### Using a slice to limit the occurrences
+```python
+import datetime
+
+rruleStr = """
+DTSTART:20210303T100000Z
+RRULE:FREQ=DAILY
+"""
+
+# WITH my_rrules ("task_id", "rrule") AS 
+# (VALUES
+#   (1, '2021-03-03 10:00:00+00:00'::timestamptz),
+#   (1, '2021-03-04 10:00:00+00:00'::timestamptz),
+#   (1, '2021-03-05 10:00:00+00:00'::timestamptz),
+# )
+# SELECT * FROM my_rrules
+await db.rrule('my_rrules', {'rrule': rruleStr}, occurrences=slice(3)).table('my_rrules').select()
+
+# WITH my_rrules ("task_id", "rrule") AS 
+# (VALUES
+#   (1, '2021-03-13 10:00:00+00:00'::timestamptz),
+#   (1, '2021-03-15 10:00:00+00:00'::timestamptz),
+#   (1, '2021-03-17 10:00:00+00:00'::timestamptz),
+#   (1, '2021-03-19 10:00:00+00:00'::timestamptz),
+#   (1, '2021-03-21 10:00:00+00:00'::timestamptz),
+# )
+# SELECT * FROM my_rrules
+await db.rrule('my_rrules', {'rrule': rruleStr}, occurrences=slice(10,20,2)).table('my_rrules').select()
+```
+
 
 ### Tests
 Windyquery includes [tests](https://github.com/bluerelay/windyquery/tree/master/windyquery/tests). These tests are also served as examples on how to use this library.

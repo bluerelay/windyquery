@@ -105,7 +105,7 @@ class Validator:
         cols = [_field.sanitize_identifier(col) for col in columns]
         return '(' + ', '.join(cols) + ')'
 
-    def validate_rrule_values(self, rrulepos: int, values: List[Any], ctx: Ctx) -> str:
+    def validate_rrule_values(self, rrulepos: int, values: List[Any], ctx: Ctx, occurrences: slice) -> str:
         row = []
         args = []
         for pos, val in enumerate(values):
@@ -118,7 +118,7 @@ class Validator:
                 row.append(None)
         results = []
         # set a limit in case the rrule is unbound
-        for tm in values[rrulepos][:100000]:
+        for tm in values[rrulepos][occurrences]:
             row[rrulepos], _ = process_value(str(tm.astimezone(UTC)))
             nestedCtx = Ctx(ctx.param_offset + len(ctx.args), args)
             rowTmpl = '(' + _value_list.parse(','.join(row), nestedCtx) + ')'

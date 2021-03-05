@@ -155,3 +155,33 @@ def test_rrule_raw(db: DB):
     assert rows[0]['task_id'] == 3
     assert rows[1]['task_id'] == 3
     assert rows[2]['task_id'] == 3
+
+
+def test_rrule_slice(db: DB):
+    rruleStr3 = """
+    DTSTART:20210203T100000Z
+    RRULE:FREQ=DAILY
+    """
+    rows = loop.run_until_complete(db.rrule('task_rrules', {'rrule': rruleStr3}, occurrences=slice(
+        3)).table('task_rrules').select('task_rrules.rrule'))
+    assert len(rows) == 3
+    assert rows[0]['rrule'] == datetime.datetime(
+        2021, 2, 3, 10, 0, tzinfo=datetime.timezone.utc)
+    assert rows[1]['rrule'] == datetime.datetime(
+        2021, 2, 4, 10, 0, tzinfo=datetime.timezone.utc)
+    assert rows[2]['rrule'] == datetime.datetime(
+        2021, 2, 5, 10, 0, tzinfo=datetime.timezone.utc)
+
+    rows = loop.run_until_complete(db.rrule('task_rrules', {'rrule': rruleStr3}, occurrences=slice(
+        10, 20, 2)).table('task_rrules').select('task_rrules.rrule'))
+    assert len(rows) == 5
+    assert rows[0]['rrule'] == datetime.datetime(
+        2021, 2, 13, 10, 0, tzinfo=datetime.timezone.utc)
+    assert rows[1]['rrule'] == datetime.datetime(
+        2021, 2, 15, 10, 0, tzinfo=datetime.timezone.utc)
+    assert rows[2]['rrule'] == datetime.datetime(
+        2021, 2, 17, 10, 0, tzinfo=datetime.timezone.utc)
+    assert rows[3]['rrule'] == datetime.datetime(
+        2021, 2, 19, 10, 0, tzinfo=datetime.timezone.utc)
+    assert rows[4]['rrule'] == datetime.datetime(
+        2021, 2, 21, 10, 0, tzinfo=datetime.timezone.utc)

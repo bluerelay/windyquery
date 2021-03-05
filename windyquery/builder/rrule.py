@@ -6,7 +6,7 @@ from ._crud_base import CrudBase
 
 class Rrule(CrudBase):
 
-    def rrule(self, name: str, *items: Dict):
+    def rrule(self, name: str, *items: Dict, occurrences: slice = slice(100000)):
         if len(items) == 0:
             raise UserWarning('rrule cannot be empty')
         columns = list(items[0].keys())
@@ -27,7 +27,7 @@ class Rrule(CrudBase):
                         raise UserWarning(f'invalid rrule: {colVal}') from None
                 val.append(colVal)
             values.append(val)
-        self.collector.rrule(name, rrulepos, columns, values)
+        self.collector.rrule(name, rrulepos, columns, values, occurrences)
         return self
 
     def build_rrule(self, items) -> str:

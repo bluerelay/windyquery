@@ -18,7 +18,7 @@ class RruleToken(LexToken):
 
 
 class Rrule(Base):
-    def rrule(self, name: str, rrulepos: int, columns: List[str], values: List[Any]):
+    def rrule(self, name: str, rrulepos: int, columns: List[str], values: List[Any], occurrences: slice):
         try:
             name = self.validator.validate_identifier(name)
             sqlColumns = self.validator.validate_rrule_columns(columns)
@@ -27,7 +27,7 @@ class Rrule(Base):
             for row in values:
                 ctx = Ctx(self.paramOffset, [])
                 sqlValues.append(
-                    self.validator.validate_rrule_values(rrulepos, row, ctx))
+                    self.validator.validate_rrule_values(rrulepos, row, ctx, occurrences))
                 self.paramOffset += len(ctx.args)
                 args += ctx.args
         except ValidationError as err:
