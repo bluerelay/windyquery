@@ -26,10 +26,12 @@ class Rrule(Base):
             args = []
             for row in values:
                 ctx = Ctx(self.paramOffset, [])
-                sqlValues.append(
-                    self.validator.validate_rrule_values(rrulepos, row, ctx, occurrences))
-                self.paramOffset += len(ctx.args)
-                args += ctx.args
+                sqlVal = self.validator.validate_rrule_values(
+                    rrulepos, row, ctx, occurrences)
+                if sqlVal:
+                    sqlValues.append(sqlVal)
+                    self.paramOffset += len(ctx.args)
+                    args += ctx.args
         except ValidationError as err:
             raise UserWarning(f'invalid RRULE: {err}') from None
 

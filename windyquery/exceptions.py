@@ -1,0 +1,2 @@
+class RruleNoResults(Exception):
+    pass

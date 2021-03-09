@@ -1,5 +1,6 @@
 from typing import Dict
 from dateutil import rrule
+from windyquery.exceptions import RruleNoResults
 
 from ._crud_base import CrudBase
 
@@ -36,6 +37,9 @@ class Rrule(CrudBase):
             name = item['name']
             columns = item['columns']
             values = item['values']
+            if not values:
+                raise RruleNoResults(
+                    f'the rrule for {name} returns no results')
             parsedItem = f'{name} {columns} AS (VALUES {values})'
             parsedItems.append(parsedItem)
         sql = 'WITH ' + ', '.join(parsedItems)

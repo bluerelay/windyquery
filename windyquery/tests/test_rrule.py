@@ -1,7 +1,9 @@
 import asyncio
 import datetime
+import pytest
 
 from windyquery import DB
+from windyquery.exceptions import RruleNoResults
 
 loop = asyncio.get_event_loop()
 
@@ -185,3 +187,10 @@ def test_rrule_slice(db: DB):
         2021, 2, 19, 10, 0, tzinfo=datetime.timezone.utc)
     assert rows[4]['rrule'] == datetime.datetime(
         2021, 2, 21, 10, 0, tzinfo=datetime.timezone.utc)
+
+
+def test_rrule_no_results(db: DB):
+    with pytest.raises(RruleNoResults) as excinfo:
+        loop.run_until_complete(
+            db.rrule('rrule1', {'rrule': rruleStr1}, occurrences=slice(1000, 1001)).table('rrule1').select())
+    assert type(excinfo.value) is RruleNoResults
