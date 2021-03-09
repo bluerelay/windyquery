@@ -164,8 +164,8 @@ def test_rrule_slice(db: DB):
     DTSTART:20210203T100000Z
     RRULE:FREQ=DAILY
     """
-    rows = loop.run_until_complete(db.rrule('task_rrules', {'rrule': rruleStr3}, occurrences=slice(
-        3)).table('task_rrules').select('task_rrules.rrule'))
+    rows = loop.run_until_complete(db.rrule('task_rrules', {'rrule': rruleStr3, 'rrule_slice': slice(
+        3)}).table('task_rrules').select('task_rrules.rrule'))
     assert len(rows) == 3
     assert rows[0]['rrule'] == datetime.datetime(
         2021, 2, 3, 10, 0, tzinfo=datetime.timezone.utc)
@@ -174,8 +174,8 @@ def test_rrule_slice(db: DB):
     assert rows[2]['rrule'] == datetime.datetime(
         2021, 2, 5, 10, 0, tzinfo=datetime.timezone.utc)
 
-    rows = loop.run_until_complete(db.rrule('task_rrules', {'rrule': rruleStr3}, occurrences=slice(
-        10, 20, 2)).table('task_rrules').select('task_rrules.rrule'))
+    rows = loop.run_until_complete(db.rrule('task_rrules', {'rrule': rruleStr3, 'rrule_slice': slice(
+        10, 20, 2)}).table('task_rrules').select('task_rrules.rrule'))
     assert len(rows) == 5
     assert rows[0]['rrule'] == datetime.datetime(
         2021, 2, 13, 10, 0, tzinfo=datetime.timezone.utc)
@@ -192,5 +192,5 @@ def test_rrule_slice(db: DB):
 def test_rrule_no_results(db: DB):
     with pytest.raises(RruleNoResults) as excinfo:
         loop.run_until_complete(
-            db.rrule('rrule1', {'rrule': rruleStr1}, occurrences=slice(1000, 1001)).table('rrule1').select())
+            db.rrule('rrule1', {'rrule': rruleStr1, 'rrule_slice': slice(1000, 1001)}, ).table('rrule1').select())
     assert type(excinfo.value) is RruleNoResults

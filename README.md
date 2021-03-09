@@ -592,7 +592,7 @@ RRULE:FREQ=DAILY
 #   (1, '2021-03-05 10:00:00+00:00'::timestamptz),
 # )
 # SELECT * FROM my_rrules
-await db.rrule('my_rrules', {'rrule': rruleStr}, occurrences=slice(3)).table('my_rrules').select()
+await db.rrule('my_rrules', {'rrule': rruleStr, 'rrule_slice': slice(3)}).table('my_rrules').select()
 
 # WITH my_rrules ("task_id", "rrule") AS 
 # (VALUES
@@ -603,7 +603,7 @@ await db.rrule('my_rrules', {'rrule': rruleStr}, occurrences=slice(3)).table('my
 #   (1, '2021-03-21 10:00:00+00:00'::timestamptz),
 # )
 # SELECT * FROM my_rrules
-await db.rrule('my_rrules', {'rrule': rruleStr}, occurrences=slice(10,20,2)).table('my_rrules').select()
+await db.rrule('my_rrules', {'rrule': rruleStr, 'rrule_slice': slice(10,20,2)}).table('my_rrules').select()
 ```
 
 

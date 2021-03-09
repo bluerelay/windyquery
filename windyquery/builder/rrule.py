@@ -7,7 +7,7 @@ from ._crud_base import CrudBase
 
 class Rrule(CrudBase):
 
-    def rrule(self, name: str, *items: Dict, occurrences: slice = slice(100000)):
+    def rrule(self, name: str, *items: Dict):
         if len(items) == 0:
             raise UserWarning('rrule cannot be empty')
         columns = list(items[0].keys())
@@ -16,6 +16,10 @@ class Rrule(CrudBase):
         if 'rrule' not in columns:
             raise UserWarning('the input dict must contain a "rrule" field')
         rrulepos = columns.index('rrule')
+        if 'rrule_slice' in columns:
+            slicepos = columns.index('rrule_slice')
+        else:
+            slicepos = None
         values = []
         for item in items:
             val = []
@@ -28,7 +32,7 @@ class Rrule(CrudBase):
                         raise UserWarning(f'invalid rrule: {colVal}') from None
                 val.append(colVal)
             values.append(val)
-        self.collector.rrule(name, rrulepos, columns, values, occurrences)
+        self.collector.rrule(name, rrulepos, slicepos, columns, values)
         return self
 
     def build_rrule(self, items) -> str:
