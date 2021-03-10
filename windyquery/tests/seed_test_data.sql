@@ -51,7 +51,7 @@ INSERT INTO tasks ("id", "name") VALUES
     (1, 'tax return'),
     (2, 'pick up kids');
 
-CREATE TABLE task_results ("id" serial PRIMARY KEY, "task_id" INTEGER, "result" TEXT);
+CREATE TABLE task_results ("id" serial PRIMARY KEY, "created_at" timestamp with time zone,  "task_id" INTEGER, "result" TEXT);
 INSERT INTO task_results ("id", "task_id", "result") VALUES
     (1, 1, ''),
     (2, 2, '');

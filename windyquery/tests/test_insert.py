@@ -2,6 +2,7 @@ import asyncio
 import string
 import random
 import json
+import datetime
 
 from windyquery import DB
 
@@ -146,3 +147,27 @@ def test_insert3(db: DB):
         db.table('users').where('id', insertId).delete().returning())
     assert len(rows) == 1
     assert rows[0]['id'] == insertId
+
+
+def test_insert_datetime(db: DB):
+    createdAt = datetime.datetime(
+        2021, 3, 8, 23, 50, tzinfo=datetime.timezone.utc)
+
+    async def insert_fn():
+        results = await db.table('task_results').insert({
+            'task_id': 100,
+            'created_at': createdAt,
+        }).returning('id')
+        return results
+
+    rows = loop.run_until_complete(insert_fn())
+    assert len(rows) == 1
+    insertedId = rows[0]['id']
+    rows = loop.run_until_complete(
+        db.table('task_results').where('id', rows[0]['id']).select())
+    assert len(rows) == 1
+    assert rows[0]['created_at'] == createdAt
+    rows = loop.run_until_complete(
+        db.table('task_results').where('id', rows[0]['id']).delete().returning())
+    assert len(rows) == 1
+    assert rows[0]['id'] == insertedId

@@ -1,4 +1,5 @@
 import json
+import datetime
 from typing import Any, Tuple
 
 
@@ -36,6 +37,9 @@ def process_value(val: Any) -> Tuple[str, Any]:
         val = 'DEFAULT'
     elif isinstance(val, dict) or isinstance(val, list):
         param = json.dumps(val)
+        val = '?'
+    elif isinstance(val, datetime.datetime) or isinstance(val, datetime.date):
+        param = val
         val = '?'
     elif isinstance(val, bool):
         if val:
