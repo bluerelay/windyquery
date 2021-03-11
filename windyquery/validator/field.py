@@ -12,6 +12,7 @@ class Field(FullnameJson, TextVal, NULL, Holder, TRUE, FALSE):
                 **FullnameJson.reserved, **NULL.reserved, **Holder.reserved, **TRUE.reserved, **FALSE.reserved}
     tokens = Base.tokens + TextVal.tokens + \
         FullnameJson.tokens + NULL.tokens + Holder.tokens + TRUE.tokens + FALSE.tokens
+    precedence = FullnameJson.precedence
 
     # Tokens
 

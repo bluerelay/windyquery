@@ -9,6 +9,7 @@ class FullnameJson(Fullname, Number, Minus):
     reserved = {**Fullname.reserved, **Number.reserved, **Minus.reserved}
     tokens = Fullname.tokens + Number.tokens + \
         Minus.tokens + ('ARROW', 'DARROW',)
+    precedence = Fullname.precedence + Minus.precedence
 
     # Tokens
     t_ARROW = r'->'

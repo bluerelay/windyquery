@@ -1,4 +1,4 @@
-from ._base import _rule, ValidationError
+from ._base import _rule
 from .field import Field
 from .operators.operator import Operator
 
@@ -6,7 +6,7 @@ from .operators.operator import Operator
 class Expr(Field, Operator):
     reserved = {**Field.reserved, **Operator.reserved}
     tokens = Field.tokens + Operator.tokens
-    precedence = Operator.precedence
+    precedence = Field.precedence + Operator.precedence
 
     # rules
     _start = 'expr'
@@ -21,7 +21,12 @@ class Expr(Field, Operator):
                    | expr IS expr
                    | expr LIKE expr
                    | expr ILIKE expr
-                   | expr DPIPE expr''')
+                   | expr DPIPE expr
+                   | expr MINUS expr
+                   | expr PLUS expr
+                   | expr MULTI expr
+                   | expr DIVIDE expr
+                   | expr MODULAR expr''')
     def p_expr(self, p):
         p[0] = self.provider.new_biop(p[2].upper(), p[1], p[3])
 

@@ -20,7 +20,8 @@ class Operator(Comma, Equal, Paren, Negate):
         Paren.tokens + \
         Negate.tokens + \
         ('IN', 'IS', 'LIKE', 'ILIKE', 'DISTINCT', 'FROM',
-         'LE', 'LS', 'GE', 'GT', 'NE', 'NN', 'DPIPE',)
+         'LE', 'LS', 'GE', 'GT', 'NE', 'NN', 'DPIPE',
+         'PLUS', 'MULTI', 'DIVIDE', 'MODULAR',)
 
     # Tokens
     t_IN = r'IN'
@@ -36,6 +37,10 @@ class Operator(Comma, Equal, Paren, Negate):
     t_NE = r'\!='
     t_NN = r'<>'
     t_DPIPE = r'\|\|'
+    t_PLUS = r'\+'
+    t_MULTI = r'\*'
+    t_DIVIDE = r'/'
+    t_MODULAR = r'%'
 
     precedence = Comma.precedence + \
         Equal.precedence + \
@@ -53,4 +58,8 @@ class Operator(Comma, Equal, Paren, Negate):
             ('left', 'DPIPE'),
             ('left', 'DISTINCT'),
             ('left', 'FROM'),
+            ('left', 'PLUS'),
+            ('left', 'MULTI'),
+            ('left', 'DIVIDE'),
+            ('left', 'MODULAR')
         )

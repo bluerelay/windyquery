@@ -156,6 +156,9 @@ await db.table('users AS u').insert(
 # UPDATE cards SET name = 'Tom' WHERE id = 9
 await db.table('cards').where('id', 9).update({'name': 'Tom'})
 
+# UPDATE cards SET total = total + 1 WHERE id = 9
+await db.table('cards').update('total = total + 1').where('id', 9)
+
 # UPDATE users SET name = orders.name
 #   FROM orders
 #   WHERE orders.user_id = users.id

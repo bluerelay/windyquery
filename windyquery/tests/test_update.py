@@ -116,3 +116,62 @@ def test_update1(db: DB):
     assert row['email'] == r"this is '3rd user' \nemail"
     assert row['admin'] == True
     assert row['password'] == 'Wash dishes'
+
+
+def test_update2(db: DB):
+
+    async def insert_fn(test_id):
+        result = await db.table('tasks').insert({
+            'id': test_id,
+            'name': 'test-update2',
+        }).returning('id')
+        return result
+
+    async def delete_fn(test_id):
+        await db.table('tasks').where('id', test_id).delete()
+        return await db.table('tasks').select().where('id', test_id)
+
+    async def update_plus(test_id):
+        await db.table('tasks').update('id = id + 1').where('id', test_id)
+        result = await db.table('tasks').where('id', test_id+1).select()
+        return result[0]
+
+    async def update_minus(test_id):
+        await db.table('tasks').update('id = id - 1').where('id', test_id)
+        result = await db.table('tasks').where('id', test_id-1).select()
+        return result[0]
+
+    async def update_multi(test_id):
+        await db.table('tasks').update('id = id * 2').where('id', test_id)
+        result = await db.table('tasks').where('id', test_id * 2).select()
+        return result[0]
+
+    async def update_divide(test_id):
+        await db.table('tasks').update('id = id / 2').where('id', test_id)
+        result = await db.table('tasks').where('id', int(test_id / 2)).select()
+        return result[0]
+
+    async def update_mod(test_id):
+        await db.table('tasks').update('id = id % 10').where('id', test_id)
+        result = await db.table('tasks').where('id', test_id % 10).select()
+        return result[0]
+
+    testID = 8630
+    rows = loop.run_until_complete(insert_fn(testID))
+    assert len(rows) == 1
+    row = loop.run_until_complete(update_plus(testID))
+    assert row['id'] == testID + 1
+    testID = row['id']
+    row = loop.run_until_complete(update_minus(testID))
+    assert row['id'] == testID - 1
+    testID = row['id']
+    row = loop.run_until_complete(update_multi(testID))
+    assert row['id'] == testID * 2
+    testID = row['id']
+    row = loop.run_until_complete(update_divide(testID))
+    assert row['id'] == testID / 2
+    testID = row['id']
+    row = loop.run_until_complete(update_mod(testID))
+    assert row['id'] == testID % 10
+    rows = loop.run_until_complete(delete_fn(row['id']))
+    assert len(rows) == 0
