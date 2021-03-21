@@ -40,17 +40,19 @@ class DB(Select, Update, Insert, Delete, Create, Drop, Alter, Rrule, Raw):
         raise UserWarning('no connection set up for the DB instance')
 
     def toSql(self) -> Tuple[str, Any]:
-        args = []
-        if self.mode == 'crud':
-            sql, args = self.build_crud()
-        elif self.mode == 'schema':
-            sql = self.build_schema()
-        elif self.mode == 'raw':
-            sql, args = self.build_raw()
-        else:
-            raise UserWarning('the sql build is incomplete')
-        self._reset()
-        return str(sql), args
+        try:
+            args = []
+            if self.mode == 'crud':
+                sql, args = self.build_crud()
+            elif self.mode == 'schema':
+                sql = self.build_schema()
+            elif self.mode == 'raw':
+                sql, args = self.build_raw()
+            else:
+                raise UserWarning('the sql build is incomplete')
+            return str(sql), args
+        finally:
+            self._reset()
 
     async def exec(self):
         pool = self._get_pool()

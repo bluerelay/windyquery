@@ -194,3 +194,7 @@ def test_rrule_no_results(db: DB):
         loop.run_until_complete(
             db.rrule('rrule1', {'rrule': rruleStr1, 'rrule_slice': slice(1000, 1001)}, ).table('rrule1').select())
     assert type(excinfo.value) is RruleNoResults
+    # it should reset the build after an exception is raised
+    rows = loop.run_until_complete(
+        db.rrule('rrule1', {'rrule': rruleStr1, 'rrule_slice': slice(0, 1)}, ).table('rrule1').select())
+    assert len(rows) == 1
