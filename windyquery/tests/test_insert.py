@@ -171,3 +171,29 @@ def test_insert_datetime(db: DB):
         db.table('task_results').where('id', rows[0]['id']).delete().returning())
     assert len(rows) == 1
     assert rows[0]['id'] == insertedId
+
+
+def test_insert_newline(db: DB):
+    createdAt = datetime.datetime(
+        2021, 3, 8, 23, 50, tzinfo=datetime.timezone.utc)
+
+    async def insert_fn():
+        results = ['started', 'finished']
+        results = await db.table('task_results').insert({
+            'task_id': 100,
+            'created_at': createdAt,
+            'result': '\n'.join(results)
+        }).returning('id')
+        return results
+
+    rows = loop.run_until_complete(insert_fn())
+    assert len(rows) == 1
+    insertedId = rows[0]['id']
+    rows = loop.run_until_complete(
+        db.table('task_results').where('id', rows[0]['id']).select())
+    assert len(rows) == 1
+    assert '\n' in rows[0]['result']
+    rows = loop.run_until_complete(
+        db.table('task_results').where('id', rows[0]['id']).delete().returning())
+    assert len(rows) == 1
+    assert rows[0]['id'] == insertedId

@@ -12,12 +12,20 @@ def quote_identifier(name: str) -> str:
 # add quotes to literal
 def quote_literal(name: str) -> str:
     name = name.replace("'", "''")
-    # if '\\' in name:
-    #     name = name.replace('\\', '\\\\')
-    #     name = " E'" + name + "'"
-    # else:
-    #    name = "'" + name + "'"
-    name = "'" + name + "'"
+    isExtended = False
+    if '\n' in name:
+        name = name.replace('\n', '\\n')
+        isExtended = True
+    if '\t' in name:
+        name = name.replace('\t', '\\t')
+        isExtended = True
+    if '\v' in name:
+        name = name.replace('\v', '\\v')
+        isExtended = True
+    if isExtended:
+        name = " E'" + name + "'"
+    else:
+        name = "'" + name + "'"
     return name
 
 
