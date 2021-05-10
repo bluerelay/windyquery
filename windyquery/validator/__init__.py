@@ -1,5 +1,6 @@
 from typing import List, Any
 from dateutil.tz import UTC
+from dateutil import rrule
 from windyquery.ctx import Ctx
 from windyquery.utils import process_value
 
@@ -103,26 +104,24 @@ class Validator:
 
     def validate_rrule_columns(self, columns: List[str]) -> str:
         cols = [_field.sanitize_identifier(col) for col in columns]
+        # the 1st is rrule timestamp; refer to validate_rrule_value
+        cols.insert(0, 'rrule')
         return '(' + ', '.join(cols) + ')'
 
-    def validate_rrule_values(self, rrulepos: int, values: List[Any], ctx: Ctx, occurrences: slice) -> str:
-        row = []
+    def validate_rrule_values(self, ctx: Ctx, values: List[Any], rrulesetVal: rrule.rruleset,  occurrences: slice) -> str:
+        row = [None]  # slot for rrule timestamp
         args = []
-        for pos, val in enumerate(values):
-            if pos != rrulepos:
-                val, p = process_value(val)
-                if p is not None:
-                    args.append(p)
-                row.append(str(val))
-            else:
-                row.append(None)
+        for val in values:
+            val, p = process_value(val)
+            if p is not None:
+                args.append(p)
+            row.append(str(val))
         results = []
         # set a limit in case the rrule is unbound
-        for tm in values[rrulepos][occurrences]:
-            row[rrulepos], _ = process_value(str(tm.astimezone(UTC)))
+        for tm in rrulesetVal[occurrences]:
+            row[0], _ = process_value(str(tm.astimezone(UTC)))
             nestedCtx = Ctx(ctx.param_offset + len(ctx.args), args)
             rowTmpl = '(' + _value_list.parse(','.join(row), nestedCtx) + ')'
-            results.append(rowTmpl.replace(
-                row[rrulepos], f'{row[rrulepos]}::timestamptz'))
+            results.append(rowTmpl.replace(row[0], f'{row[0]}::timestamptz'))
             ctx.args.extend(args)
         return ', '.join(results)

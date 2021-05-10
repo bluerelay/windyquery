@@ -439,6 +439,81 @@ await db.rrule('my_rrules', {
     }, {
         'rrule': rruleStr2
     }).table('my_rrules').select()
+
+# the rrule field can also take a list of mulitple rrules.
+# the previous example is equivalent to
+await db.rrule('my_rrules', {
+        'rrule': [rruleStr1, rruleStr2]
+    }).table('my_rrules').select()
+```
+
+#### Use rdate
+```python
+# WITH my_rrules ("rrule") AS 
+# (VALUES
+#   ('2021-05-03 10:00:00+00:00'::timestamptz)
+# )
+# SELECT * FROM my_rrules
+await db.rrule('my_rrules', {'rdate': '20210503T100000Z'}).table('my_rrules').select()
+
+rruleStr = """
+DTSTART:20210303T100000Z
+RRULE:FREQ=DAILY;COUNT=5
+"""
+
+# WITH my_rrules ("rrule") AS 
+# (VALUES
+#   ('2021-03-03 10:00:00+00:00'::timestamptz),
+#   ('2021-03-04 10:00:00+00:00'::timestamptz),
+#   ('2021-03-05 10:00:00+00:00'::timestamptz),
+#   ('2021-03-06 10:00:00+00:00'::timestamptz),
+#   ('2021-03-07 10:00:00+00:00'::timestamptz),
+#   ('2021-05-03 10:00:00+00:00'::timestamptz)
+# )
+# SELECT * FROM my_rrules
+await db.rrule('my_rrules', {'rrule': rruleStr, 'rdate': '20210503T100000Z'}).table('my_rrules').select()
+
+# similary to rrule, the rdate field can take a list of date strings
+# WITH my_rrules ("rrule") AS 
+# (VALUES
+#   ('2021-03-03 10:00:00+00:00'::timestamptz),
+#   ('2021-03-04 10:00:00+00:00'::timestamptz),
+#   ('2021-03-05 10:00:00+00:00'::timestamptz),
+#   ('2021-03-06 10:00:00+00:00'::timestamptz),
+#   ('2021-03-07 10:00:00+00:00'::timestamptz),
+#   ('2021-05-03 10:00:00+00:00'::timestamptz),
+#   ('2021-06-03 10:00:00+00:00'::timestamptz)
+# )
+# SELECT * FROM my_rrules
+await db.rrule('my_rrules', {'rrule': rruleStr, 'rdate': ['20210503T100000Z','20210603T100000Z']}).table('my_rrules').select()
+```
+
+#### Use exdate
+```python
+rruleStr = """
+DTSTART:20210303T100000Z
+RRULE:FREQ=DAILY;COUNT=5
+"""
+
+# WITH my_rrules ("rrule") AS 
+# (VALUES
+#   ('2021-03-03 10:00:00+00:00'::timestamptz),
+#   ('2021-03-05 10:00:00+00:00'::timestamptz),
+#   ('2021-03-06 10:00:00+00:00'::timestamptz),
+#   ('2021-03-07 10:00:00+00:00'::timestamptz)
+# )
+# SELECT * FROM my_rrules
+await db.rrule('my_rrules', {'rrule': rruleStr, 'exdate': '20210304T100000Z'}).table('my_rrules').select()
+
+# similary to rrule, the exdate field can take a list of date strings
+# WITH my_rrules ("rrule") AS 
+# (VALUES
+#   ('2021-03-03 10:00:00+00:00'::timestamptz),
+#   ('2021-03-05 10:00:00+00:00'::timestamptz),
+#   ('2021-03-07 10:00:00+00:00'::timestamptz)
+# )
+# SELECT * FROM my_rrules
+await db.rrule('my_rrules', {'rrule': rruleStr, 'exdate': ['20210304T100000Z','20210306T100000Z']}).table('my_rrules').select()
 ```
 
 #### Join rrule with other tables

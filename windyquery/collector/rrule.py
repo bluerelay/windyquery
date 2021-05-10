@@ -18,23 +18,23 @@ class RruleToken(LexToken):
 
 
 class Rrule(Base):
-    def rrule(self, name: str, rrulepos: int, slicepos: int, columns: List[str], values: List[Any]):
+    def rrule(self, name: str, columns: List[str], values: List[Any]):
         try:
             name = self.validator.validate_identifier(name)
-            if slicepos is not None:
-                del columns[slicepos]
             sqlColumns = self.validator.validate_rrule_columns(columns)
             sqlValues = []
             args = []
             for row in values:
                 ctx = Ctx(self.paramOffset, [])
                 occurrences = slice(100000)
-                if slicepos is not None:
-                    if row[slicepos] != 'NULL':
-                        occurrences = row[slicepos]
-                    del row[slicepos]
+                rrulesetVal = row[0]
+                sliceVal = row[1]
+                if sliceVal is not None:
+                    occurrences = sliceVal
+                del row[0]  # del rruleset
+                del row[0]  # del rrule_slice
                 sqlVal = self.validator.validate_rrule_values(
-                    rrulepos, row, ctx, occurrences)
+                    ctx, row, rrulesetVal, occurrences)
                 if sqlVal:
                     sqlValues.append(sqlVal)
                     self.paramOffset += len(ctx.args)
