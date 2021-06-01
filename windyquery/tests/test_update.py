@@ -1,4 +1,5 @@
 import asyncio
+import datetime
 
 from windyquery import DB
 
@@ -103,7 +104,7 @@ def test_update_from(db):
 def test_update1(db: DB):
     async def update_fn():
         await db.table('users us').update({
-            'email': r"this is '3rd user' \nemail"
+            'email': "this is '3rd user' \nemail"
         }).update('admin = ?, password = cards.data->>name', True).\
             where('us.id', 2).\
             from_table('boards AS bds').\
@@ -113,7 +114,7 @@ def test_update1(db: DB):
         result = await db.table('users').where('id', 2).select()
         return result[0]
     row = loop.run_until_complete(update_fn())
-    assert row['email'] == r"this is '3rd user' \nemail"
+    assert row['email'] == "this is '3rd user' \nemail"
     assert row['admin'] == True
     assert row['password'] == 'Wash dishes'
 
@@ -175,3 +176,106 @@ def test_update2(db: DB):
     assert row['id'] == testID % 10
     rows = loop.run_until_complete(delete_fn(row['id']))
     assert len(rows) == 0
+
+
+def test_update_newline(db: DB):
+    createdAt = datetime.datetime(
+        2021, 5, 31, 15, 25, tzinfo=datetime.timezone.utc)
+
+    async def insert_fn():
+        results = ['started', 'finished']
+        results = await db.table('task_results').insert({
+            'task_id': 171,
+            'created_at': createdAt,
+            'result': '\n'.join(results)
+        }).returning('id')
+        return results
+
+    async def update_fn(taskID):
+        results = ['started2', 'finished2']
+        results = await db.table('task_results').update({
+            'result': '\n'.join(results)
+        }).where('id', taskID)
+        return results
+
+    rows = loop.run_until_complete(insert_fn())
+    assert len(rows) == 1
+    insertedId = rows[0]['id']
+    loop.run_until_complete(update_fn(insertedId))
+    rows = loop.run_until_complete(
+        db.table('task_results').where('id', insertedId).select())
+    assert len(rows) == 1
+    assert '\nfinished2' in rows[0]['result']
+    rows = loop.run_until_complete(
+        db.table('task_results').where('id', insertedId).delete().returning())
+    assert len(rows) == 1
+    assert rows[0]['id'] == insertedId
+
+
+def test_update_tab(db: DB):
+    createdAt = datetime.datetime(
+        2021, 5, 31, 20, 5, tzinfo=datetime.timezone.utc)
+
+    async def insert_fn():
+        results = ['started', 'finished']
+        results = await db.table('task_results').insert({
+            'task_id': 172,
+            'created_at': createdAt,
+            'result': '\t'.join(results)
+        }).returning('id')
+        return results
+
+    async def update_fn(taskID):
+        results = ['started2', 'finished2']
+        results = await db.table('task_results').update({
+            'result': '\t'.join(results)
+        }).where('id', taskID)
+        return results
+
+    rows = loop.run_until_complete(insert_fn())
+    assert len(rows) == 1
+    insertedId = rows[0]['id']
+    loop.run_until_complete(update_fn(insertedId))
+    rows = loop.run_until_complete(
+        db.table('task_results').where('id', insertedId).select())
+    assert len(rows) == 1
+    assert '\tfinished2' in rows[0]['result']
+    rows = loop.run_until_complete(
+        db.table('task_results').where('id', insertedId).delete().returning())
+    assert len(rows) == 1
+    assert rows[0]['id'] == insertedId
+
+
+def test_update_contain_empty_text(db: DB):
+    createdAt = datetime.datetime(
+        2021, 5, 31, 22, 11, tzinfo=datetime.timezone.utc)
+
+    async def insert_fn():
+        results = ['started', 'finished']
+        results = await db.table('task_results').insert({
+            'task_id': 173,
+            'created_at': createdAt,
+            'result': '\t'.join(results)
+        }).returning('id')
+        return results
+
+    async def update_fn(taskID):
+        results = await db.table('task_results').update({
+            'created_at': createdAt,
+            'result': '',
+            'task_id': 137,
+        }).where('id', taskID)
+        return results
+
+    rows = loop.run_until_complete(insert_fn())
+    assert len(rows) == 1
+    insertedId = rows[0]['id']
+    loop.run_until_complete(update_fn(insertedId))
+    rows = loop.run_until_complete(
+        db.table('task_results').where('id', insertedId).select())
+    assert len(rows) == 1
+    assert rows[0]['result'] == ''
+    rows = loop.run_until_complete(
+        db.table('task_results').where('id', insertedId).delete().returning())
+    assert len(rows) == 1
+    assert rows[0]['id'] == insertedId
