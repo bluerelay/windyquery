@@ -51,4 +51,10 @@ class Update(CrudBase):
                 ws.append(w['sql'])
             if len(ws) > 0:
                 sql += ' WHERE ' + ' AND '.join(ws)
+        # RETURNING
+        if 'RETURNING' in data:
+            items = data['RETURNING']
+            if len(items) == 0:
+                items = ['*']
+            sql += ' RETURNING ' + ', '.join(items)
         return sql, data['_params']

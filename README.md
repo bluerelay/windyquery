@@ -159,6 +159,12 @@ await db.table('cards').where('id', 9).update({'name': 'Tom'})
 # UPDATE cards SET total = total + 1 WHERE id = 9
 await db.table('cards').update('total = total + 1').where('id', 9)
 
+# UPDATE users SET name = 'Tom' WHERE id = 9 RETRUNING *
+await db.table('users').update({'name': 'Tom'}).where('id', '=', 9).returning()
+
+# UPDATE users SET name = 'Tom' WHERE id = 9 RETRUNING id, name
+await db.table('users').update({'name': 'Tom'}).where('id', '=', 9).returning('id', 'name')
+
 # UPDATE users SET name = orders.name
 #   FROM orders
 #   WHERE orders.user_id = users.id
@@ -356,6 +362,33 @@ await db.table('users').update({'data': {'address': {'city': 'New York'}}})
 await db.table('users').update({'data->address->city': 'Chicago'})
 ```
 
+### Syntax checker
+A very important part of windyquery is to validate the inputs of the various builder methods. It defines a [Validator](https://github.com/bluerelay/windyquery/blob/master/windyquery/validator/__init__.py) class, which is used to reject input strings not following the proper syntax.
+As a result, it can be used separately as a syntax checker for other DB libraries. For example, it is very common for REST API to support filtering or searching parameters specified by the users,
+```python
+......
+# GET /example-api/users?name=Tom&state=AZ;DROP%20TABLE%20Students
+url_query = "name=Tom&state=AZ;DROP TABLE Students"
+where = url_query.replace("&", " AND ")
+
+from windyquery.validator import Validator
+from windyquery.validator import ValidationError
+from windyquery.ctx import Ctx
+
+try:
+    ctx = Ctx()
+    where = validator.validate_where(where, ctx)
+except ValidationError:
+    abort(400, f'Invalid query parameters: {url_query}')
+
+connection = psycopg2.connect(**dbConfig)
+cursor = connection.cursor()
+cursor.execute(f'SELECT * FROM users WHERE {where}')
+......
+```
+Please note,
+- Except `raw`, all windyquery's own builder methods, such as `select`, `udpate`, `where`, and so on, already implicitly use these validation functions. They may be useful when used alone, for example, to help other DB libraries validate SQL snippets;
+- These validation functions only cover a very small (though commonly used) subset of SQL grammar of Postgres.
 
 ### Listen for a notification
 Postgres implements [LISTEN/NOTIFY](https://www.postgresql.org/docs/12/sql-listen.html) for interprocess communications.

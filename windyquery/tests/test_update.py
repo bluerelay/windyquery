@@ -279,3 +279,48 @@ def test_update_contain_empty_text(db: DB):
         db.table('task_results').where('id', insertedId).delete().returning())
     assert len(rows) == 1
     assert rows[0]['id'] == insertedId
+
+
+def test_update_returning(db: DB):
+    createdAt = datetime.datetime(
+        2021, 6, 19, 19, 46, tzinfo=datetime.timezone.utc)
+
+    async def insert_fn():
+        results = ['add', 'missing', 'update', 'returning']
+        results = await db.table('task_results').insert({
+            'task_id': 179,
+            'created_at': createdAt,
+            'result': '\n'.join(results)
+        }).returning('id')
+        return results
+
+    async def update_fn(taskID):
+        results = await db.table('task_results').update({
+            'created_at': createdAt,
+            'result': 'update returning',
+            'task_id': 129,
+        }).where('id', taskID).returning()
+        return results
+
+    async def update_fn2(taskID):
+        results = await db.table('task_results').update({
+            'result': '',
+            'task_id': 139,
+        }).where('id', taskID).returning('id', 'task_id')
+        return results
+
+    rows = loop.run_until_complete(insert_fn())
+    assert len(rows) == 1
+    insertedId = rows[0]['id']
+    rows = loop.run_until_complete(update_fn(insertedId))
+    assert len(rows) == 1
+    assert rows[0]['result'] == 'update returning'
+    assert rows[0]['task_id'] == 129
+    rows = loop.run_until_complete(update_fn2(insertedId))
+    assert len(rows) == 1
+    assert 'result' not in rows[0]
+    assert rows[0]['task_id'] == 139
+    rows = loop.run_until_complete(
+        db.table('task_results').where('id', insertedId).delete().returning())
+    assert len(rows) == 1
+    assert rows[0]['id'] == insertedId
