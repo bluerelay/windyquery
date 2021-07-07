@@ -4,14 +4,16 @@ import pytest
 from windyquery import DB
 
 
+class Config:
+    DB_HOST = "localhost"
+    DB_PORT = "5432"
+    DB_TEST = "windyquery-test"
+    DB_USER = "windyquery-test"
+    DB_PASS = "windyquery-test"
+
+
 @pytest.fixture(scope="module")
 def config():
-    class Config:
-        DB_HOST = "localhost"
-        DB_PORT = "5432"
-        DB_TEST = "windyquery-test"
-        DB_USER = "windyquery-test"
-        DB_PASS = "windyquery-test"
     yield Config
 
 

@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="windyquery",
-    version="0.0.23",
+    version="0.0.24",
     author="windymile.it",
     author_email="windymile.it@gmail.com",
     description="A non-blocking PostgreSQL query builder using Asyncio",
@@ -17,10 +17,16 @@ setuptools.setup(
         'asyncpg==0.23.0',
         'ply==3.11',
         'python-dateutil==2.8.1',
+        'fire==0.4.0',
     ],
     classifiers=[
         "Programming Language :: Python :: 3.6",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
+    entry_points={
+        'console_scripts': [
+            'wq=windyquery.scripts:main',
+        ],
+    },
 )

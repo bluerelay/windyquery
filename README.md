@@ -299,7 +299,7 @@ await db.raw("""
 
 #### RAW for migration
 ```python
-await schema.raw("""
+await db.raw("""
     CREATE TABLE users(
         id                       INT NOT NULL,
         created_at               DATE NOT NULL,
@@ -362,6 +362,57 @@ await db.table('users').update({'data': {'address': {'city': 'New York'}}})
 await db.table('users').update({'data->address->city': 'Chicago'})
 ```
 
+### Migrations
+Windyquery has a preliminary support for database migrations. The provided command-line script is called `wq`. 
+
+#### Generate a migration file
+A migration file can be created by,
+```bash
+# this creates a timestamped migration file, e.g. "20210705233408_create_my_table.py"
+$ wq make_migration --name=create_my_table
+```
+
+By default, the new file is add to `database/migrations/` under the current working directory. If the diretory does not exist, it will be created first. The file contains an empty function to be filled by the user,
+```python
+async def run(db):
+    # TODO: add code here
+    pass
+```
+
+Some sample migration templates are provided at [here](https://github.com/bluerelay/windyquery/blob/master/windyquery/scripts/migration_templates.py). They can be automatically inserted in the generated file by specifying the `--template` parameter,
+```bash
+# the generated file is pre-filled with some code template,
+# async def run(db):
+#     await db.schema('TABLE my_table').create(
+#         'id      serial PRIMARY KEY',
+#         'name    text not null unique',
+#     )
+$ wq make_migration --name=create_my_table --template="create table"
+
+# create a migration file that contains all avaiable templates
+$ wq make_migration --name=create_my_table --template=all
+```
+
+#### Run migrations
+To run all of the outstanding migrations, use the `migrate` sub-command,
+```bash
+$ wq migrate --host=localhost --port=5432 --database=my-db --username=my-name --password=my-pass
+
+# alternatively, the DB config can be provided by using environment variables
+$ DB_HOST=localhost DB_PORT=5432 DB_DATABASE=my-db DB_USERNAME=my-name DB_PASSWORD=my-pass wq migrate
+```
+
+#### Use custom directory and database table
+The `wq` command requires a directory to save the migration files, and a database table to store executed migrations. By default, the migration directory is `database/migrations/` under the current working directroy, and the database table is named `migrations`. They are created automatically if they do not already exist.
+The directory and table name can be customized by using `--migration_dir` and `--migration_table` parameters,
+```bash
+# creates the migrations file in "my_db_work/migrations/" of the current directory
+$ wq make_migration --name=create_my_table --migrations_dir="my_db_work/migrations"
+
+# looks for outstanding migrations in "my_db_work/migrations/" and stores finished migrations in my_migrations table in DB
+$ wq migrate --host=localhost --port=5432 --database=my-db --username=my-name --password=my-pass --migrations_dir="my_db_work/migrations" --migrations_table=my_migrations
+```
+
 ### Syntax checker
 A very important part of windyquery is to validate the inputs of the various builder methods. It defines a [Validator](https://github.com/bluerelay/windyquery/blob/master/windyquery/validator/__init__.py) class, which is used to reject input strings not following the proper syntax.
 As a result, it can be used separately as a syntax checker for other DB libraries. For example, it is very common for REST API to support filtering or searching parameters specified by the users,
@@ -377,6 +428,7 @@ from windyquery.ctx import Ctx
 
 try:
     ctx = Ctx()
+    validator = Validator()
     where = validator.validate_where(where, ctx)
 except ValidationError:
     abort(400, f'Invalid query parameters: {url_query}')
@@ -387,7 +439,7 @@ cursor.execute(f'SELECT * FROM users WHERE {where}')
 ......
 ```
 Please note,
-- Except `raw`, all windyquery's own builder methods, such as `select`, `udpate`, `where`, and so on, already implicitly use these validation functions. They may be useful when used alone, for example, to help other DB libraries validate SQL snippets;
+- Except `raw`, all windyquery's own builder methods, such as `select`, `update`, `where`, and so on, already implicitly use these validation functions. They may be useful when used alone, for example, to help other DB libraries validate SQL snippets;
 - These validation functions only cover a very small (though commonly used) subset of SQL grammar of Postgres.
 
 ### Listen for a notification
