@@ -1,3 +1,10 @@
+<a name="0.0.25"></a>
+# 0.0.25 (2021-07-12)
+### exrule
+| Commit | Description |
+| -- | -- |
+| [cfc94ba](https://github.com/bluerelay/windyquery/commit/cfc94babd8b4a44f03316680d96e0cd257c81963) | include exrule for RRULE CTE |
+
 <a name="0.0.24"></a>
 # 0.0.24 (2021-07-06)
 ### migrations
