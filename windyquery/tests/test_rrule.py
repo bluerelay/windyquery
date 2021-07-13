@@ -18,6 +18,11 @@ RRULE:FREQ=DAILY;INTERVAL=10;COUNT=5
 RRULE:FREQ=DAILY;INTERVAL=5;COUNT=3
 """
 
+exruleStr1 = """
+DTSTART:20210303T100000Z
+RRULE:FREQ=DAILY;BYWEEKDAY=SA,SU
+"""
+
 
 def test_rrule_select1(db: DB):
     rows = loop.run_until_complete(
@@ -264,29 +269,38 @@ def test_rrule_exdate(db: DB):
         2021, 3, 7, 10, 0, tzinfo=datetime.timezone.utc)
 
 
+def test_rrule_exrule(db: DB):
+    rows = loop.run_until_complete(
+        db.rrule('rrule1', {'rrule': rruleStr1, 'exrule': exruleStr1}).table('rrule1').select())
+    assert len(rows) == 3
+    assert rows[0]['rrule'] == datetime.datetime(
+        2021, 3, 3, 10, 0, tzinfo=datetime.timezone.utc)
+    assert rows[1]['rrule'] == datetime.datetime(
+        2021, 3, 4, 10, 0, tzinfo=datetime.timezone.utc)
+    assert rows[2]['rrule'] == datetime.datetime(
+        2021, 3, 5, 10, 0, tzinfo=datetime.timezone.utc)
+
+
 def test_rrule_coexist(db: DB):
     rows = loop.run_until_complete(
         db.rrule('rrule1', {'rrule': [rruleStr1, rruleStr2],
+                            'exrule': exruleStr1,
                             'rdate': ['20210603T100000Z', '20210310T100000Z'],
                             'exdate': ['20210304T100000Z', '20210313T100000Z']}).order_by('rrule').table('rrule1').select())
-    assert len(rows) == 10
+    assert len(rows) == 8
     assert rows[0]['rrule'] == datetime.datetime(
         2021, 3, 3, 10, 0, tzinfo=datetime.timezone.utc)
     assert rows[1]['rrule'] == datetime.datetime(
         2021, 3, 5, 10, 0, tzinfo=datetime.timezone.utc)
     assert rows[2]['rrule'] == datetime.datetime(
-        2021, 3, 6, 10, 0, tzinfo=datetime.timezone.utc)
-    assert rows[3]['rrule'] == datetime.datetime(
-        2021, 3, 7, 10, 0, tzinfo=datetime.timezone.utc)
-    assert rows[4]['rrule'] == datetime.datetime(
         2021, 3, 8, 10, 0, tzinfo=datetime.timezone.utc)
-    assert rows[5]['rrule'] == datetime.datetime(
+    assert rows[3]['rrule'] == datetime.datetime(
         2021, 3, 10, 10, 0, tzinfo=datetime.timezone.utc)
-    assert rows[6]['rrule'] == datetime.datetime(
+    assert rows[4]['rrule'] == datetime.datetime(
         2021, 3, 23, 10, 0, tzinfo=datetime.timezone.utc)
-    assert rows[7]['rrule'] == datetime.datetime(
+    assert rows[5]['rrule'] == datetime.datetime(
         2021, 4, 2, 10, 0, tzinfo=datetime.timezone.utc)
-    assert rows[8]['rrule'] == datetime.datetime(
+    assert rows[6]['rrule'] == datetime.datetime(
         2021, 4, 12, 10, 0, tzinfo=datetime.timezone.utc)
-    assert rows[9]['rrule'] == datetime.datetime(
+    assert rows[7]['rrule'] == datetime.datetime(
         2021, 6, 3, 10, 0, tzinfo=datetime.timezone.utc)

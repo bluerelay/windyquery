@@ -70,13 +70,13 @@ await db.table('users').select().where('id', '=', 1).where('name', '=', 'Tom')
 await db.table('users').select().where('id = ? AND name = ?', 1, 'Tom')
 
 # SELECT * FROM users WHERE id IN (1, 2)
-await db.table('cards').select().where("id", [1, 2]))
+await db.table('cards').select().where("id", [1, 2])
 
 # SELECT * FROM users WHERE id IN (1, 2)
-await db.table('cards').select().where("id", 'IN', [1, 2]))
+await db.table('cards').select().where("id", 'IN', [1, 2])
 
 # SELECT * FROM users WHERE id IN (1, 2)
-await db.table('cards').select().where("id IN (?, ?)", 1, 2))
+await db.table('cards').select().where("id IN (?, ?)", 1, 2)
 
 # SELECT * FROM users ORDER BY id, name DESC
 await db.table('users').select().order_by('id', 'name DESC')
@@ -530,6 +530,28 @@ await db.rrule('my_rrules', {
 await db.rrule('my_rrules', {
         'rrule': [rruleStr1, rruleStr2]
     }).table('my_rrules').select()
+```
+
+#### Use exrule
+```python
+rruleStr = """
+DTSTART:20210303T100000Z
+RRULE:FREQ=DAILY;COUNT=5
+"""
+
+exruleStr = """
+DTSTART:20210303T100000Z
+RRULE:FREQ=DAILY;BYWEEKDAY=SA,SU
+"""
+
+# WITH my_rrules ("rrule") AS 
+# (VALUES
+#   ('2021-03-03 10:00:00+00:00'::timestamptz),
+#   ('2021-03-04 10:00:00+00:00'::timestamptz),
+#   ('2021-03-05 10:00:00+00:00'::timestamptz)
+# )
+# SELECT * FROM my_rrules
+await db.rrule('my_rrules', {'rrule': rruleStr, 'exrule': exruleStr}).table('my_rrules').select()
 ```
 
 #### Use rdate

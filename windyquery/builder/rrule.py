@@ -17,6 +17,8 @@ class Rrule(CrudBase):
         # keep only custom fields
         if 'rrule' in columns:
             columns.remove('rrule')
+        if 'exrule' in columns:
+            columns.remove('exrule')
         if 'rdate' in columns:
             columns.remove('rdate')
         if 'exdate' in columns:
@@ -47,6 +49,21 @@ class Rrule(CrudBase):
                     except:
                         raise UserWarning(
                             f'invalid rrule: {rruleVal}') from None
+            if item.get('exrule', False):
+                exruleRawVal = item.get('exrule')
+                exruleVals = []
+                if isinstance(exruleRawVal, list) or isinstance(exruleRawVal, tuple):
+                    exruleVals = list(exruleRawVal)
+                elif isinstance(exruleRawVal, str):
+                    exruleVals = [exruleRawVal]
+                else:
+                    raise UserWarning(f'invalid exrule input {exruleRawVal}')
+                for exruleVal in exruleVals:
+                    try:
+                        rrset.exrule(rrule.rrulestr(exruleVal))
+                    except:
+                        raise UserWarning(
+                            f'invalid exrule: {exruleVal}') from None
             if item.get('rdate', False):
                 rdateRawVal = item.get('rdate')
                 rdateVals = []
