@@ -304,3 +304,112 @@ def test_rrule_coexist(db: DB):
         2021, 4, 12, 10, 0, tzinfo=datetime.timezone.utc)
     assert rows[7]['rrule'] == datetime.datetime(
         2021, 6, 3, 10, 0, tzinfo=datetime.timezone.utc)
+
+
+def test_rrule_functions(db: DB):
+    from dateutil.parser import parse
+    rruleStr = "DTSTART:20210715T100000Z\nRRULE:FREQ=DAILY;COUNT=5"
+    exruleStr = "DTSTART:20210715T100000Z\nRRULE:FREQ=DAILY;BYWEEKDAY=SA,SU"
+
+    async def test_fn():
+        result1 = await db.rrule('my_rrules', {'rrule': rruleStr, 'exrule': exruleStr, 'rrule_after': [parse('20210716T100000Z')]}).table('my_rrules').select()
+        result2 = await db.rrule('my_rrules', {'rrule': rruleStr, 'exrule': exruleStr, 'rrule_after': {'dt': parse('20210716T100000Z')}}).table('my_rrules').select()
+        result3 = await db.rrule('my_rrules', {'rrule': rruleStr, 'exrule': exruleStr, 'rrule_after': ('20210716T100000Z',)}).table('my_rrules').select()
+        result4 = await db.rrule('my_rrules', {'rrule': rruleStr, 'exrule': exruleStr, 'rrule_after': {'dt': '20210716T100000Z', 'inc': True}}).table('my_rrules').select()
+        result5 = await db.rrule('my_rrules', {'rrule': rruleStr, 'exrule': exruleStr, 'rrule_after': ['20210716T100000Z', True]}).table('my_rrules').select()
+        result6 = await db.rrule('my_rrules', {'rrule': rruleStr, 'exrule': exruleStr, 'rrule_before': [parse('20210719T100000Z')]}).table('my_rrules').select()
+        result7 = await db.rrule('my_rrules', {'rrule': rruleStr, 'exrule': exruleStr, 'rrule_before': {'dt': parse('20210719T100000Z')}}).table('my_rrules').select()
+        result8 = await db.rrule('my_rrules', {'rrule': rruleStr, 'exrule': exruleStr, 'rrule_before': ('20210719T100000Z',)}).table('my_rrules').select()
+        result9 = await db.rrule('my_rrules', {'rrule': rruleStr, 'exrule': exruleStr, 'rrule_before': {'dt': '20210719T100000Z', 'inc': True}}).table('my_rrules').select()
+        result10 = await db.rrule('my_rrules', {'rrule': rruleStr, 'exrule': exruleStr, 'rrule_before': ['20210719T100000Z', True]}).table('my_rrules').select()
+        result11 = await db.rrule('my_rrules', {'rrule': rruleStr, 'exrule': exruleStr, 'rrule_between': [parse('20210716T100000Z'), parse('20210720T100000Z')]}).table('my_rrules').select()
+        result12 = await db.rrule('my_rrules', {'rrule': rruleStr, 'exrule': exruleStr, 'rrule_between': {'after': parse('20210716T100000Z'), 'before': parse('20210720T100000Z')}}).table('my_rrules').select()
+        result13 = await db.rrule('my_rrules', {'rrule': rruleStr, 'exrule': exruleStr, 'rrule_between': ('20210716T100000Z', '20210720T100000Z')}).table('my_rrules').select()
+        result14 = await db.rrule('my_rrules', {'rrule': rruleStr, 'exrule': exruleStr, 'rrule_between': {'after': '20210716T100000Z', 'before': '20210719T100000Z', 'inc': True}}).table('my_rrules').select()
+        result15 = await db.rrule('my_rrules', {'rrule': rruleStr, 'exrule': exruleStr, 'rrule_between': ['20210716T100000Z', '20210719T100000Z', True]}).table('my_rrules').select()
+        result16 = await db.rrule('my_rrules', {'rrule': rruleStr, 'exrule': exruleStr, 'rrule_after': ['20210716T100000Z'], 'rrule_before': ['20210719T100000Z'], 'rrule_between': ['20210716T100000Z', '20210719T100000Z', True]}).table('my_rrules').select()
+        result17 = await db.rrule('my_rrules', {'rrule': rruleStr, 'exrule': exruleStr, 'rrule_after': ['20210719T100000Z'], 'rrule_before': ['20210719T100000Z'], 'rrule_between': ['20210716T100000Z', '20210719T100000Z', True]}).table('my_rrules').select()
+        result18 = await db.rrule('my_rrules', {'rrule': rruleStr, 'exrule': exruleStr, 'rrule_slice': slice(1), 'rrule_between': ['20210716T100000Z', '20210719T100000Z', True]}).table('my_rrules').select()
+        return result1, result2, result3, result4, result5, \
+            result6, result7, result8, result9, result10, \
+            result11, result12, result13, result14, result15, \
+            result16, result17, result18
+
+    result1, result2, result3, result4, result5, \
+        result6, result7, result8, result9, result10, \
+        result11, result12, result13, result14, result15, \
+        result16, result17, result18 = loop.run_until_complete(
+            test_fn())
+    assert len(result1) == 1
+    assert result1[0]['rrule'] == datetime.datetime(
+        2021, 7, 19, 10, 0, tzinfo=datetime.timezone.utc)
+    assert len(result2) == 1
+    assert result2[0]['rrule'] == datetime.datetime(
+        2021, 7, 19, 10, 0, tzinfo=datetime.timezone.utc)
+    assert len(result3) == 1
+    assert result3[0]['rrule'] == datetime.datetime(
+        2021, 7, 19, 10, 0, tzinfo=datetime.timezone.utc)
+    assert len(result4) == 1
+    assert result4[0]['rrule'] == datetime.datetime(
+        2021, 7, 16, 10, 0, tzinfo=datetime.timezone.utc)
+    assert len(result5) == 1
+    assert result5[0]['rrule'] == datetime.datetime(
+        2021, 7, 16, 10, 0, tzinfo=datetime.timezone.utc)
+    assert len(result6) == 1
+    assert result6[0]['rrule'] == datetime.datetime(
+        2021, 7, 16, 10, 0, tzinfo=datetime.timezone.utc)
+    assert len(result7) == 1
+    assert result7[0]['rrule'] == datetime.datetime(
+        2021, 7, 16, 10, 0, tzinfo=datetime.timezone.utc)
+    assert len(result8) == 1
+    assert result8[0]['rrule'] == datetime.datetime(
+        2021, 7, 16, 10, 0, tzinfo=datetime.timezone.utc)
+    assert len(result9) == 1
+    assert result9[0]['rrule'] == datetime.datetime(
+        2021, 7, 19, 10, 0, tzinfo=datetime.timezone.utc)
+    assert len(result10) == 1
+    assert result10[0]['rrule'] == datetime.datetime(
+        2021, 7, 19, 10, 0, tzinfo=datetime.timezone.utc)
+    assert len(result11) == 1
+    assert result11[0]['rrule'] == datetime.datetime(
+        2021, 7, 19, 10, 0, tzinfo=datetime.timezone.utc)
+    assert len(result12) == 1
+    assert result12[0]['rrule'] == datetime.datetime(
+        2021, 7, 19, 10, 0, tzinfo=datetime.timezone.utc)
+    assert len(result13) == 1
+    assert result13[0]['rrule'] == datetime.datetime(
+        2021, 7, 19, 10, 0, tzinfo=datetime.timezone.utc)
+    assert len(result14) == 2
+    assert result14[0]['rrule'] == datetime.datetime(
+        2021, 7, 16, 10, 0, tzinfo=datetime.timezone.utc)
+    assert result14[1]['rrule'] == datetime.datetime(
+        2021, 7, 19, 10, 0, tzinfo=datetime.timezone.utc)
+    assert len(result15) == 2
+    assert result15[0]['rrule'] == datetime.datetime(
+        2021, 7, 16, 10, 0, tzinfo=datetime.timezone.utc)
+    assert result15[1]['rrule'] == datetime.datetime(
+        2021, 7, 19, 10, 0, tzinfo=datetime.timezone.utc)
+    assert len(result16) == 1
+    assert result16[0]['rrule'] == datetime.datetime(
+        2021, 7, 19, 10, 0, tzinfo=datetime.timezone.utc)
+    assert len(result17) == 1
+    assert result17[0]['rrule'] == datetime.datetime(
+        2021, 7, 16, 10, 0, tzinfo=datetime.timezone.utc)
+    assert len(result18) == 1
+    assert result18[0]['rrule'] == datetime.datetime(
+        2021, 7, 16, 10, 0, tzinfo=datetime.timezone.utc)
+
+    with pytest.raises(RruleNoResults) as excinfo:
+        loop.run_until_complete(db.rrule('my_rrules', {'rrule': rruleStr, 'exrule': exruleStr, 'rrule_after': [
+                                '20210719T100000Z']}).table('my_rrules').select())
+    assert type(excinfo.value) is RruleNoResults
+
+    with pytest.raises(RruleNoResults) as excinfo:
+        loop.run_until_complete(db.rrule('my_rrules', {'rrule': rruleStr, 'exrule': exruleStr, 'rrule_before': [
+                                '20210715T100000Z']}).table('my_rrules').select())
+    assert type(excinfo.value) is RruleNoResults
+
+    with pytest.raises(RruleNoResults) as excinfo:
+        loop.run_until_complete(db.rrule('my_rrules', {'rrule': rruleStr, 'exrule': exruleStr, 'rrule_between': {
+                                'after': parse('20210716T100000Z'), 'before': parse('20210719T100000Z')}}).table('my_rrules').select())
+    assert type(excinfo.value) is RruleNoResults

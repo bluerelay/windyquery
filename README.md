@@ -623,6 +623,66 @@ await db.rrule('my_rrules', {'rrule': rruleStr, 'exdate': '20210304T100000Z'}).t
 await db.rrule('my_rrules', {'rrule': rruleStr, 'exdate': ['20210304T100000Z','20210306T100000Z']}).table('my_rrules').select()
 ```
 
+#### Use after, before, and between
+```python
+rruleStr = """
+DTSTART:20210715T100000Z
+RRULE:FREQ=DAILY;COUNT=5
+"""
+
+# rrule_after returns the first recurrence after the given datetime dt.
+# WITH my_rrules ("rrule") AS 
+# (VALUES
+#   ('2021-07-17 10:00:00+00:00'::timestamptz)
+# )
+# SELECT * FROM my_rrules
+await db.rrule('my_rrules', {'rrule': rruleStr, 'rrule_after': {'dt': '20210716T100000Z'}}]}).table('my_rrules').select()
+
+# if the inc keyword is True dt is included if it is an occurrence.
+# WITH my_rrules ("rrule") AS 
+# (VALUES
+#   ('2021-07-16 10:00:00+00:00'::timestamptz)
+# )
+# SELECT * FROM my_rrules
+await db.rrule('my_rrules', {'rrule': rruleStr, 'rrule_after': {'dt': '20210716T100000Z', 'inc': True}}]}).table('my_rrules').select()
+
+# rrule_before returns the last recurrence before the given datetime dt.
+# WITH my_rrules ("rrule") AS 
+# (VALUES
+#   ('2021-07-15 10:00:00+00:00'::timestamptz)
+# )
+# SELECT * FROM my_rrules
+await db.rrule('my_rrules', {'rrule': rruleStr, 'rrule_before': {'dt': '20210716T100000Z'}}]}).table('my_rrules').select()
+
+# if the inc keyword is True dt is included if it is an occurrence.
+# WITH my_rrules ("rrule") AS 
+# (VALUES
+#   ('2021-07-16 10:00:00+00:00'::timestamptz)
+# )
+# SELECT * FROM my_rrules
+await db.rrule('my_rrules', {'rrule': rruleStr, 'rrule_before': {'dt': '20210716T100000Z', 'inc': True}}]}).table('my_rrules').select()
+
+# rrule_between returns all the occurrences of the rrule between after and before.
+# WITH my_rrules ("rrule") AS 
+# (VALUES
+#   ('2021-07-17 10:00:00+00:00'::timestamptz)
+#   ('2021-07-18 10:00:00+00:00'::timestamptz)
+# )
+# SELECT * FROM my_rrules
+await db.rrule('my_rrules', {'rrule': rruleStr, 'rrule_between': {'after': '20210716T100000Z', 'before': '20210719T100000Z'}}]}).table('my_rrules').select()
+
+# if the inc keyword is True after and/or before are included if they are occurrences.
+# WITH my_rrules ("rrule") AS 
+# (VALUES
+#   ('2021-07-16 10:00:00+00:00'::timestamptz)
+#   ('2021-07-17 10:00:00+00:00'::timestamptz)
+#   ('2021-07-18 10:00:00+00:00'::timestamptz)
+#   ('2021-07-19 10:00:00+00:00'::timestamptz)
+# )
+# SELECT * FROM my_rrules
+await db.rrule('my_rrules', {'rrule': rruleStr, 'rrule_between': {'after': '20210716T100000Z', 'before': '20210719T100000Z', 'inc': True}}]}).table('my_rrules').select()
+```
+
 #### Join rrule with other tables
 ```python
 import datetime

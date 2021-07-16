@@ -29,12 +29,18 @@ class Rrule(Base):
                 occurrences = slice(100000)
                 rrulesetVal = row[0]
                 sliceVal = row[1]
+                afterVal = row[2]
+                beforeVal = row[3]
+                betweenVal = row[4]
                 if sliceVal is not None:
                     occurrences = sliceVal
                 del row[0]  # del rruleset
                 del row[0]  # del rrule_slice
+                del row[0]  # del rrule_after
+                del row[0]  # del rrule_before
+                del row[0]  # del rrule_between
                 sqlVal = self.validator.validate_rrule_values(
-                    ctx, row, rrulesetVal, occurrences)
+                    ctx, row, rrulesetVal, occurrences, afterVal, beforeVal, betweenVal)
                 if sqlVal:
                     sqlValues.append(sqlVal)
                     self.paramOffset += len(ctx.args)

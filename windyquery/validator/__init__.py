@@ -108,7 +108,7 @@ class Validator:
         cols.insert(0, 'rrule')
         return '(' + ', '.join(cols) + ')'
 
-    def validate_rrule_values(self, ctx: Ctx, values: List[Any], rrulesetVal: rrule.rruleset,  occurrences: slice) -> str:
+    def validate_rrule_values(self, ctx: Ctx, values: List[Any], rrulesetVal: rrule.rruleset,  occurrences: slice, afterVal: tuple, beforeVal: tuple, betweenVal: tuple) -> str:
         row = [None]  # slot for rrule timestamp
         args = []
         for val in values:
@@ -117,8 +117,24 @@ class Validator:
                 args.append(p)
             row.append(str(val))
         results = []
+        tms = []
+        # try rrule_after, rrule_before, and rrule_between
+        if afterVal is not None or beforeVal is not None or betweenVal is not None:
+            if afterVal is not None:
+                tm = rrulesetVal.after(*afterVal)
+                if tm:
+                    tms.append(tm)
+            if len(tms) == 0 and beforeVal is not None:
+                tm = rrulesetVal.before(*beforeVal)
+                if tm:
+                    tms.append(tm)
+            if len(tms) == 0 and betweenVal is not None:
+                tms = rrulesetVal.between(*betweenVal)
+        else:
+            tms = rrulesetVal
+
         # set a limit in case the rrule is unbound
-        for tm in rrulesetVal[occurrences]:
+        for tm in tms[occurrences]:
             row[0], _ = process_value(str(tm.astimezone(UTC)))
             nestedCtx = Ctx(ctx.param_offset + len(ctx.args), args)
             rowTmpl = '(' + _value_list.parse(','.join(row), nestedCtx) + ')'
