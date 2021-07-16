@@ -1,3 +1,10 @@
+<a name="0.0.26"></a>
+# 0.0.26 (2021-07-15)
+### add after, before, and between to rrule
+| Commit | Description |
+| -- | -- |
+| [054547b](https://github.com/bluerelay/windyquery/commit/054547bbf5ac81b96ec152bde8942bed45415187) | add after, before, and between for RRULE CTE |
+
 <a name="0.0.25"></a>
 # 0.0.25 (2021-07-12)
 ### exrule
