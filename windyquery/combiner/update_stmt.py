@@ -30,6 +30,10 @@ class UpdateStmt:
     def p_update_returning(self, p):
         p.lexer.append('RETURNING', p[1], 1)
 
+    @_rule('update_stmt : WITH_VALUES')
+    def p_update_with_values(self, p):
+        p.lexer.append('WITH_VALUES', p[1])
+
     @_rule('''update_stmts : update_stmt update_stmts
                            | update_stmt''')
     def p_update_stmts(self, p):

@@ -18,17 +18,18 @@ from .alter import Alter
 from .on_conflict import OnConflict
 from .raw import Raw
 from .rrule import Rrule
+from .with_values import WithValues
 
 
 tokens = (
     'START_SELECT', 'START_UPDATE', 'START_INSERT', 'START_DELETE', 'START_CREATE', 'START_DROP', 'START_ALTER', 'START_RAW',
     'TABLE', 'SELECT', 'WHERE', 'LIMIT', 'OFFSET', 'GROUP_BY', 'ORDER_BY', 'JOIN', 'UPDATE',
     'FROM_TABLE', 'INSERT', 'RETURNING', 'DELETE', 'SCHEMA', 'CREATE', 'DROP',
-    'ALTER', 'ON_CONFLICT', 'RRULE', 'RAW',
+    'ALTER', 'ON_CONFLICT', 'RRULE', 'RAW', 'WITH_VALUES'
 )
 
 
 class Collector(Table, Select, Where, Limit, Offset, GroupBy, OrderBy, Join, Update, FromTable, Insert,
-                Returning, Delete, Schema, Create, Drop, Alter, OnConflict, Raw, Rrule):
+                Returning, Delete, Schema, Create, Drop, Alter, OnConflict, Raw, Rrule, WithValues):
     """collect user input"""
     pass

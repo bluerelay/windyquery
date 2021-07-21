@@ -49,7 +49,9 @@ CREATE TABLE students ("id" serial PRIMARY KEY, "firstname" TEXT, "lastname" TEX
 CREATE TABLE tasks ("id" serial PRIMARY KEY, "name" TEXT);
 INSERT INTO tasks ("id", "name") VALUES
     (1, 'tax return'),
-    (2, 'pick up kids');
+    (2, 'pick up kids'),
+    (3, 'Tom task'),
+    (4, 'Jerry task');
 
 CREATE TABLE task_results ("id" serial PRIMARY KEY, "created_at" timestamp with time zone,  "task_id" INTEGER, "result" TEXT);
 INSERT INTO task_results ("id", "task_id", "result") VALUES

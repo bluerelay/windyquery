@@ -38,6 +38,10 @@ class SelectStmt:
     def p_select_rrule(self, p):
         p.lexer.append('RRULE', p[1])
 
+    @_rule('select_stmt : WITH_VALUES')
+    def p_select_with_values(self, p):
+        p.lexer.append('WITH_VALUES', p[1])
+
     @_rule('''select_stmts : select_stmt
                            | select_stmt select_stmts''')
     def p_select_stmts(self, p):

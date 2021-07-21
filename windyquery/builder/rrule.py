@@ -244,5 +244,5 @@ class Rrule(CrudBase):
                     f'the rrule for {name} returns no results')
             parsedItem = f'{name} {columns} AS (VALUES {values})'
             parsedItems.append(parsedItem)
-        sql = 'WITH ' + ', '.join(parsedItems)
+        sql = ', '.join(parsedItems)
         return sql

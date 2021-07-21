@@ -10,6 +10,10 @@ class RawStmt:
     def p_raw_rrule(self, p):
         p.lexer.append('RRULE', p[1])
 
+    @_rule('raw_stmt : WITH_VALUES')
+    def p_raw_with_values(self, p):
+        p.lexer.append('WITH_VALUES', p[1])
+
     @_rule('''raw_stmts : raw_stmt
                         | raw_stmt raw_stmts''')
     def p_raw_stmts(self, p):

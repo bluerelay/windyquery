@@ -1,6 +1,7 @@
 from typing import List, Any
 from dateutil.tz import UTC
 from dateutil import rrule
+import datetime
 from windyquery.ctx import Ctx
 from windyquery.utils import process_value
 
@@ -109,14 +110,6 @@ class Validator:
         return '(' + ', '.join(cols) + ')'
 
     def validate_rrule_values(self, ctx: Ctx, values: List[Any], rrulesetVal: rrule.rruleset,  occurrences: slice, afterVal: tuple, beforeVal: tuple, betweenVal: tuple) -> str:
-        row = [None]  # slot for rrule timestamp
-        args = []
-        for val in values:
-            val, p = process_value(val)
-            if p is not None:
-                args.append(p)
-            row.append(str(val))
-        results = []
         tms = []
         # try rrule_after, rrule_before, and rrule_between
         if afterVal is not None or beforeVal is not None or betweenVal is not None:
@@ -134,10 +127,42 @@ class Validator:
             tms = rrulesetVal
 
         # set a limit in case the rrule is unbound
+        results = []
+        row = [None]  # slot for rrule timestamp
+        for val in values:
+            row.append(val)
         for tm in tms[occurrences]:
-            row[0], _ = process_value(str(tm.astimezone(UTC)))
-            nestedCtx = Ctx(ctx.param_offset + len(ctx.args), args)
-            rowTmpl = '(' + _value_list.parse(','.join(row), nestedCtx) + ')'
-            results.append(rowTmpl.replace(row[0], f'{row[0]}::timestamptz'))
-            ctx.args.extend(args)
+            row[0] = tm
+            result = '(' + self.validate_value_list(ctx, row) + ')'
+            results.append(result)
         return ', '.join(results)
+
+    def validate_value_list(self, ctx: Ctx, values: List[Any]) -> str:
+        replaces = {}
+        transformedValues = []
+        args = []
+        for val in values:
+            if isinstance(val, datetime.datetime) or isinstance(val, datetime.date):
+                val, _ = process_value(str(val.astimezone(UTC)))
+                replaces[val] = f'{val}::timestamptz'
+            else:
+                val, p = process_value(val)
+                if p is not None:
+                    args.append(p)
+                val = str(val)
+            transformedValues.append(val)
+
+        nestedCtx = Ctx(ctx.param_offset + len(ctx.args), args)
+        result = _value_list.parse(','.join(transformedValues), nestedCtx)
+        for rep in replaces:
+            result = result.replace(rep, replaces[rep])
+        ctx.args.extend(args)
+        return result
+
+    def validate_with_columns(self, columns: List[str]) -> str:
+        cols = [_field.sanitize_identifier(col) for col in columns]
+        return '(' + ', '.join(cols) + ')'
+
+    def validate_with_values(self, ctx: Ctx, values: List[Any]) -> str:
+        result = '(' + self.validate_value_list(ctx, values) + ')'
+        return result

@@ -14,9 +14,10 @@ from .drop import Drop
 from .alter import Alter
 from .raw import Raw
 from .rrule import Rrule
+from .with_values import WithValues
 
 
-class DB(Select, Update, Insert, Delete, Create, Drop, Alter, Rrule, Raw):
+class DB(Select, Update, Insert, Delete, Create, Drop, Alter, Rrule, Raw, WithValues):
     """DB class"""
 
     def __init__(self):

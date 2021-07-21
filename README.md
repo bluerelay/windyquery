@@ -310,6 +310,94 @@ await db.raw("""
 """)
 ```
 
+### WITH Clause using VALUES Lists
+The Postgres [VALUES](https://www.postgresql.org/docs/12/queries-values.html) provides a way to generate a "constant table" from a list of values. Together with the [WITH](https://www.postgresql.org/docs/12/queries-with.html) clause, a small set of data can be loaded into the DB and queried like a table.
+
+### SELECT using WITH VALUES
+```python
+result = await db.with_values('my_values', {
+    'text_col': 'Tom',
+    'bool_col': True,
+    'num_col': 2,
+    'dict_col': {'id': 1},
+    'datetime_col': datetime.now(),
+    'null_col': 'null',
+    'null_col2': None
+}).table('my_values').select()
+result[0]['text_col']      # 'Tom'
+result[0]['bool_col']      # True
+result[0]['num_col']       # 2
+result[0]['dict_col']      # '{"id": 1}'
+result[0]['datetime_col']  # datetime.datetime(2021, 7, 20, 10, 0, tzinfo=datetime.timezone.utc)
+result[0]['null_col']      # None
+result[0]['null_col2']     # None
+
+# join other tables
+await db.with_values('workers', {
+    'task_id': 1,
+    'name': 'Tom'
+}, {
+    'task_id': 2,
+    'name': 'Jerry'
+}).table('workers').select(
+    'workers.name AS worker_name',
+    'tasks.name AS task_name'
+).join('tasks', 'workers.task_id = tasks.id').order_by('tasks.id')
+
+# multiple WITH VALUES
+await db.with_values('workers1', {
+    'task_id': 1,
+    'name': 'Tom'
+}, {
+    'task_id': 2,
+    'name': 'Jerry'
+}).with_values('workers2', {
+    'task_id': 1,
+    'name': 'Topsy'
+}, {
+    'task_id': 2,
+    'name': 'Nibbles'
+}).table('tasks').select(
+    'workers1.name AS primary_worker_name',
+    'workers2.name AS secondary_worker_name',
+    'tasks.name AS task_name'
+).join('workers1', 'workers1.task_id = tasks.id').\
+    join('workers2', 'workers2.task_id = tasks.id')
+```
+
+### UPDATE using WITH VALUES
+```python
+await db.with_values('workers', {
+    'task_id': 1,
+    'name': 'Tom'
+}, {
+    'task_id': 2,
+    'name': 'Jerry'
+}).table('tasks').update("name = tasks.name || ' (worked by ' || workers.name || ')'").\
+    from_table('workers').\
+    where('workers.task_id = tasks.id').\
+    returning(
+        'workers.name AS worker_name',
+        'tasks.name AS task_name'
+    )
+```
+
+### RAW using WITH VALUES
+```python
+await db.with_values('workers', {
+    'task_id': 1,
+    'name': 'Tom'
+}, {
+    'task_id': 2,
+    'name': 'Jerry'
+}).raw("""
+SELECT * FROM tasks WHERE EXISTS(
+    SELECT 1 FROM workers
+    JOIN task_results ON workers.task_id = task_results.task_id
+    WHERE workers.task_id = tasks.id
+)
+""")
+```
 
 ### JSONB examples
 Methods are created to support jsonb data type for some simple use cases.

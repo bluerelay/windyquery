@@ -39,7 +39,7 @@ def unquote_literal(name: str) -> str:
 
 def process_value(val: Any) -> Tuple[str, Any]:
     param = None
-    if val is None or val == 'NULL':
+    if val is None or val == 'NULL' or val == 'null':
         val = 'NULL'
     elif val == 'DEFAULT':
         val = 'DEFAULT'
