@@ -1,3 +1,10 @@
+<a name="0.0.27"></a>
+# 0.0.27 (2021-07-21)
+### WITH Clause using the VALUES Lists
+| Commit | Description |
+| -- | -- |
+| [8d2be18](https://github.com/bluerelay/windyquery/commit/8d2be18d2bf0d2d89a36746ae05d1ec2e67e375b) | add the first support of WITH clause but limited to VALUES Lists |
+
 <a name="0.0.26"></a>
 # 0.0.26 (2021-07-15)
 ### add after, before, and between to rrule
