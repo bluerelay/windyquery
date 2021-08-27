@@ -1,3 +1,10 @@
+<a name="0.0.28"></a>
+# 0.0.28 (2021-08-26)
+### raise exception when the connection is closed during listening on a channel
+| Commit | Description |
+| -- | -- |
+| [830859a](https://github.com/bluerelay/windyquery/commit/830859a0d23207717a75b73737c48b25ddd8e1f9) | raise error if connection is closed during listen |
+
 <a name="0.0.27"></a>
 # 0.0.27 (2021-07-21)
 ### WITH Clause using the VALUES Lists
