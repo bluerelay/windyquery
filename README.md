@@ -313,8 +313,13 @@ await db.raw("""
 ### WITH Clause using VALUES Lists
 The Postgres [VALUES](https://www.postgresql.org/docs/12/queries-values.html) provides a way to generate a "constant table" from a list of values. Together with the [WITH](https://www.postgresql.org/docs/12/queries-with.html) clause, a small set of data can be loaded into the DB and queried like a table.
 
-### SELECT using WITH VALUES
+#### SELECT using WITH VALUES
 ```python
+# WITH "my_values" ("text_col", "bool_col", "num_col", "dict_col", "datetime_col", "null_col", "null_col2") AS
+#   (VALUES 
+#     ('Tom', TRUE, 2, '{"id": 1}'::jsonb, '2021-07-20 10:00:00+00:00'::timestamptz, NULL, NULL)
+#   )
+# SELECT * FROM "my_values"
 result = await db.with_values('my_values', {
     'text_col': 'Tom',
     'bool_col': True,
@@ -333,6 +338,16 @@ result[0]['null_col']      # None
 result[0]['null_col2']     # None
 
 # join other tables
+# WITH "workers" ("task_id", "name") AS 
+#   (VALUES 
+#     (1, 'Tom'), 
+#     (2, 'Jerry')
+#   ) 
+# SELECT
+#   "workers"."name" AS "worker_name",
+#   "tasks"."name" AS "task_name"
+# FROM "workers"
+# JOIN "tasks" ON "workers"."task_id" = "tasks"."id"
 await db.with_values('workers', {
     'task_id': 1,
     'name': 'Tom'
@@ -345,6 +360,22 @@ await db.with_values('workers', {
 ).join('tasks', 'workers.task_id = tasks.id').order_by('tasks.id')
 
 # multiple WITH VALUES
+# WITH "workers1" ("task_id", "name") AS
+#   (VALUES
+#     (1, 'Tom'),
+#     (2, 'Jerry')
+#   ), "workers2" ("task_id", "name") AS
+#   (VALUES
+#     (1, 'Topsy'), 
+#     (2, 'Nibbles')
+#   )
+# SELECT
+#   "workers1"."name" AS "primary_worker_name",
+#   "workers2"."name" AS "secondary_worker_name",
+#   "tasks"."name" AS "task_name"
+# FROM "tasks"
+# JOIN "workers1" ON "workers1"."task_id" = "tasks"."id"
+# JOIN "workers2" ON "workers2"."task_id" = "tasks"."id"
 await db.with_values('workers1', {
     'task_id': 1,
     'name': 'Tom'
@@ -365,8 +396,22 @@ await db.with_values('workers1', {
     join('workers2', 'workers2.task_id = tasks.id')
 ```
 
-### UPDATE using WITH VALUES
+#### UPDATE using WITH VALUES
 ```python
+# WITH "workers" ("task_id", "name") AS
+#   (VALUES
+#     (1, 'Tom'), 
+#     (2, 'Jerry')
+#   )
+# UPDATE "tasks" 
+# SET
+#   "name" = "tasks"."name" || ' (worked by ' || "workers"."name" || ')'
+# FROM "workers"
+# WHERE
+#   "workers"."task_id" = "tasks"."id"
+# RETURNING
+#   "workers"."name" AS "worker_name",
+#   "tasks"."name" AS "task_name"
 await db.with_values('workers', {
     'task_id': 1,
     'name': 'Tom'
@@ -382,8 +427,18 @@ await db.with_values('workers', {
     )
 ```
 
-### RAW using WITH VALUES
+#### RAW using WITH VALUES
 ```python
+# WITH "workers" ("task_id", "name") AS
+#   (VALUES
+#     (1, 'Tom'), 
+#     (2, 'Jerry')
+#   )
+# SELECT * FROM tasks WHERE EXISTS(
+#   SELECT 1 FROM workers
+#   JOIN task_results ON workers.task_id = task_results.task_id
+#   WHERE workers.task_id = tasks.id
+# )
 await db.with_values('workers', {
     'task_id': 1,
     'name': 'Tom'
@@ -534,6 +589,8 @@ Please note,
 Postgres implements [LISTEN/NOTIFY](https://www.postgresql.org/docs/12/sql-listen.html) for interprocess communications.
 In order to listen on a channel, use the DB.listen() method. It returns an awaitable object, which resolves to a dict when a notification fires.
 ```python
+from windyquery.exceptions import ListenConnectionClosed
+
 # method 1: manually call start() and stop()
 listener = db.listen('my_table')
 await listener.start()
@@ -548,6 +605,8 @@ try:
         #     'listener_pid': 7321,
         #     'notifier_pid': 7322
         # }
+except ListenConnectionClosed as e:
+    print(e)
 finally:
     await listener.stop()
 
