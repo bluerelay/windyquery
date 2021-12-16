@@ -1,5 +1,6 @@
 import os
 import asyncio
+from urllib.parse import quote_plus
 import fire
 
 from .migration import make_migration
@@ -53,7 +54,7 @@ class Scripts:
         migrations_table = migrations_table if migrations_table else 'migrations'
 
         async def run():
-            db = await init_db(host, port, database, username, password)
+            db = await init_db(quote_plus(host), port, quote_plus(database), quote_plus(username), quote_plus(password))
             await ensure_migrations_table(db, migrations_table)
             result = await migrate(db, self.get_migrations_dir(migrations_dir), migrations_table)
             await db.stop()
