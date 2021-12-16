@@ -1,3 +1,10 @@
+<a name="0.0.29"></a>
+# 0.0.29 (2021-12-15)
+### encode connection strs for migration cmd
+| Commit | Description |
+| -- | -- |
+| [dbd8f0e](https://github.com/bluerelay/windyquery/commit/dbd8f0ea4be4fdb0af4008c95501814ee4a6c522) | encode migration db password and other conn strs |
+
 <a name="0.0.28"></a>
 # 0.0.28 (2021-08-26)
 ### raise exception when the connection is closed during listening on a channel
