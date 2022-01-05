@@ -59,6 +59,9 @@ class DB(Select, Update, Insert, Delete, Create, Drop, Alter, Rrule, Raw, WithVa
         pool = self._get_pool()
         sql, args = self.toSql()
         async with pool.acquire() as conn:
+            # multiple queries
+            if len(args) == 0 and ';' in sql:
+                return await conn.execute(sql)
             return await conn.fetch(sql, *args)
 
     def __await__(self):

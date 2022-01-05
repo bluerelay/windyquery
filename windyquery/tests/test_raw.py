@@ -44,3 +44,12 @@ def test_insert_raw(db: DB):
     assert len(rows) == 1
     assert rows[0]['user_id'] == user_id
     assert rows[0]['location'] == location
+
+
+def test_raw_multi_queries(db: DB):
+    sql = 'SELECT 1 as one; SELECT 2 as two; SELECT 3 as three'
+
+    try:
+        loop.run_until_complete(db.raw(sql))
+    except Exception as exc:
+        assert False, f"'test_raw_multi_queries' raised an exception {exc}"
