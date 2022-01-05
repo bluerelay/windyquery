@@ -1,3 +1,10 @@
+<a name="0.0.30"></a>
+# 0.0.30 (2022-01-04)
+### able to run multiple queries in raw method
+| Commit | Description |
+| -- | -- |
+| [0ddf803](https://github.com/bluerelay/windyquery/commit/0ddf8035327e982846d2e7b5b9d360749d6fe3e1) | raw method can run multiple queries |
+
 <a name="0.0.29"></a>
 # 0.0.29 (2021-12-15)
 ### encode connection strs for migration cmd
