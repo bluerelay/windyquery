@@ -147,3 +147,25 @@ def test_create_jsonb(db: DB):
     loop.run_until_complete(drop_table())
     assert len(rows) == 3
     assert rows[2]['data_type'] == 'jsonb'
+
+
+def test_create_default_function(db: DB):
+    async def create_user_tmp():
+        return await db.schema('TABLE users_uuid_pkey').create(
+            'id   uuid PRIMARY KEY DEFAULT gen_random_uuid()',
+        )
+
+    async def drop_table():
+        return await db.schema('TABLE users_uuid_pkey').drop()
+
+    loop.run_until_complete(create_user_tmp())
+    rows = loop.run_until_complete(db.table('information_schema.columns').select(
+        'column_name', 'column_default', 'is_nullable', 'data_type'
+    ).where('table_schema', 'public').where('table_name', 'users_uuid_pkey'))
+    loop.run_until_complete(drop_table())
+
+    # verify each column
+    assert len(rows) == 1
+    assert rows[0]['column_name'] == 'id'
+    assert rows[0]['data_type'] == 'uuid'
+    assert rows[0]['column_default'] == 'gen_random_uuid()'

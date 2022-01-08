@@ -281,6 +281,10 @@ class Column(Expr, Bracket):
     def p_datadefault_now(self, p):
         p[0] = 'DEFAULT NOW()'
 
+    @_rule('datadefault : DEFAULT NAME LPAREN RPAREN')
+    def p_datadefault_use_fun(self, p):
+        p[0] = f'DEFAULT {p[2]}()'
+
     @_rule('datadefault : DEFAULT NEXTVAL LPAREN TEXTVAL RPAREN')
     def p_datadefault_nextval(self, p):
         p[0] = f'DEFAULT nextval({p[4]})'
