@@ -1,3 +1,10 @@
+<a name="0.0.31"></a>
+# 0.0.31 (2022-01-08)
+### CREATE TABLE can set default by using functions
+| Commit | Description |
+| -- | -- |
+| [e9e06a7](https://github.com/bluerelay/windyquery/commit/e9e06a7b503f3adfc40bd524eca4e37a4615c789) | use function to generate default on table create |
+
 <a name="0.0.30"></a>
 # 0.0.30 (2022-01-04)
 ### able to run multiple queries in raw method
