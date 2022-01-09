@@ -1,6 +1,7 @@
 import json
 import datetime
 from typing import Any, Tuple
+import asyncpg
 
 
 # add quotes to identifier
@@ -54,6 +55,8 @@ def process_value(val: Any) -> Tuple[str, Any]:
             val = 'TRUE'
         else:
             val = 'FALSE'
+    elif isinstance(val, asyncpg.pgproto.pgproto.UUID):
+        val = quote_literal(str(val))
     elif isinstance(val, str):
         val = quote_literal(val)
     return val, param

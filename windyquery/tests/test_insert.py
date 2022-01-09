@@ -3,6 +3,7 @@ import string
 import random
 import json
 import datetime
+import asyncpg
 
 from windyquery import DB
 
@@ -197,3 +198,37 @@ def test_insert_newline(db: DB):
         db.table('task_results').where('id', rows[0]['id']).delete().returning())
     assert len(rows) == 1
     assert rows[0]['id'] == insertedId
+
+
+def test_insert_uuid(db: DB):
+    async def insert_fn():
+        results = await db.table('tasks_uuid_pkey').insert({
+            'name': 'test'
+        }).returning('id')
+        return results
+
+    async def insert_fn2(rid):
+        results = await db.table('tasks_uuid_pkey').insert({
+            'id': rid,
+            'name': 'test'
+        }).returning('id')
+        return results
+
+    rows = loop.run_until_complete(insert_fn())
+    assert len(rows) == 1
+    insertedId = rows[0]['id']
+    assert isinstance(insertedId, asyncpg.pgproto.pgproto.UUID)
+
+    rows = loop.run_until_complete(
+        db.table('tasks_uuid_pkey').where('id', insertedId).delete().returning())
+    assert len(rows) == 1
+
+    rows = loop.run_until_complete(insert_fn2(insertedId))
+    assert len(rows) == 1
+    insertedId2 = rows[0]['id']
+    assert isinstance(insertedId2, asyncpg.pgproto.pgproto.UUID)
+    assert str(insertedId2) == str(insertedId)
+
+    rows = loop.run_until_complete(
+        db.table('tasks_uuid_pkey').where('id', insertedId2).delete().returning())
+    assert len(rows) == 1

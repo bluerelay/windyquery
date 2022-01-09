@@ -58,4 +58,6 @@ INSERT INTO task_results ("id", "task_id", "result") VALUES
     (1, 1, ''),
     (2, 2, '');
 
+CREATE TABLE tasks_uuid_pkey ("id" uuid PRIMARY KEY DEFAULT gen_random_uuid(), "name" TEXT);
+
 CREATE SCHEMA test1;
