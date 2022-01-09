@@ -1,3 +1,10 @@
+<a name="0.0.32"></a>
+# 0.0.32 (2022-01-08)
+### support UUID type so can directly use uuid in WHERE and INSERT clauses
+| Commit | Description |
+| -- | -- |
+| [ff26940](https://github.com/bluerelay/windyquery/commit/ff269403aa946f393b378d605b4a19e843d1a9de) | able to insert UUID datatype |
+
 <a name="0.0.31"></a>
 # 0.0.31 (2022-01-08)
 ### CREATE TABLE can set default by using functions
