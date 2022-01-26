@@ -2,8 +2,11 @@ from typing import List, Any
 from dateutil.tz import UTC
 from dateutil import rrule
 import datetime
+
+import asyncpg
+
 from windyquery.ctx import Ctx
-from windyquery.utils import process_value
+from windyquery.utils import process_value, quote_literal
 
 from .field import Field
 from .table import Table
@@ -145,6 +148,9 @@ class Validator:
             if isinstance(val, datetime.datetime) or isinstance(val, datetime.date):
                 val, _ = process_value(str(val.astimezone(UTC)))
                 replaces[val] = f'{val}::timestamptz'
+            elif isinstance(val, asyncpg.pgproto.pgproto.UUID):
+                val = quote_literal(str(val))
+                replaces[val] = f'{val}::uuid'
             else:
                 val, p = process_value(val)
                 if p is not None:

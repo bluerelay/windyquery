@@ -2,6 +2,8 @@ import asyncio
 from dateutil.parser import parse
 import datetime
 
+import asyncpg
+
 from windyquery import DB
 
 loop = asyncio.get_event_loop()
@@ -202,3 +204,24 @@ def test_with_values_rrule_using_raw(db: DB):
     assert rows[0]['worked_at'] == datetime.datetime(
         2021, 7, 19, 10, 0, tzinfo=datetime.timezone.utc)
     assert rows[0]['task_name'] == 'tax return'
+
+
+def test_with_values_uuid(db: DB):
+    async def insert_fn():
+        results = await db.table('tasks_uuid_pkey').insert({
+            'name': 'test123'
+        }).returning('id')
+        results = await db.with_values('uuid_vals', *results).\
+            table('tasks_uuid_pkey').\
+            select('tasks_uuid_pkey.name', 'tasks_uuid_pkey.id').\
+            join('uuid_vals', 'uuid_vals.id = tasks_uuid_pkey.id')
+        return results
+
+    rows = loop.run_until_complete(insert_fn())
+    assert len(rows) == 1
+    insertedId = rows[0]['id']
+    assert isinstance(insertedId, asyncpg.pgproto.pgproto.UUID)
+
+    rows = loop.run_until_complete(
+        db.table('tasks_uuid_pkey').where('id', insertedId).delete().returning())
+    assert len(rows) == 1
