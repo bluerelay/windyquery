@@ -1,3 +1,10 @@
+<a name="0.0.33"></a>
+# 0.0.33 (2022-01-25)
+### support UUID type so can directly use uuid in WITH clauses
+| Commit | Description |
+| -- | -- |
+| [1c77032](https://github.com/bluerelay/windyquery/commit/1c77032bed6d4ea60b98d1775f5f9f154814911f) | WITH clause can handle UUID datatype |
+
 <a name="0.0.32"></a>
 # 0.0.32 (2022-01-08)
 ### support UUID type so can directly use uuid in WHERE and INSERT clauses
