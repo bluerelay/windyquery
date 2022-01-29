@@ -1,4 +1,5 @@
 import asyncio
+import asyncpg
 
 from windyquery import DB
 
@@ -52,3 +53,37 @@ def test_where_in_by_params(db: DB):
     rows = loop.run_until_complete(
         db.table('cards').select().where("id IN (?, ?)", 5, 3))
     assert len(rows) == 2
+
+
+def test_where_with_uuid(db: DB):
+    async def insert_fn():
+        results = await db.table('tasks_uuid_pkey').insert({
+            'name': 'test'
+        }).returning('id')
+        return results
+
+    rows = loop.run_until_complete(insert_fn())
+    assert len(rows) == 1
+    insertedId1 = rows[0]['id']
+    assert isinstance(insertedId1, asyncpg.pgproto.pgproto.UUID)
+
+    rows = loop.run_until_complete(insert_fn())
+    assert len(rows) == 1
+    insertedId2 = rows[0]['id']
+    assert isinstance(insertedId2, asyncpg.pgproto.pgproto.UUID)
+
+    rows = loop.run_until_complete(
+        db.table('tasks_uuid_pkey').select().where("id", insertedId1))
+    assert len(rows) == 1
+
+    rows = loop.run_until_complete(
+        db.table('tasks_uuid_pkey').select().where("id = ? OR id = ?", insertedId1, insertedId2))
+    assert len(rows) == 2
+
+    rows = loop.run_until_complete(
+        db.table('tasks_uuid_pkey').where('id', insertedId1).delete().returning())
+    assert len(rows) == 1
+
+    rows = loop.run_until_complete(
+        db.table('tasks_uuid_pkey').where('id', insertedId2).delete().returning())
+    assert len(rows) == 1
