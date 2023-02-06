@@ -1,3 +1,5 @@
+CREATE EXTENSION pgcrypto;
+
 CREATE TABLE test ("id" serial PRIMARY KEY, "name" VARCHAR(255));
 INSERT INTO test ("name") VALUES ('test');
 

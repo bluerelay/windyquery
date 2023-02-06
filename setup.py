@@ -14,7 +14,7 @@ setuptools.setup(
     url="https://github.com/bluerelay/windyquery",
     packages=setuptools.find_packages(),
     install_requires=[
-        'asyncpg==0.23.0',
+        'asyncpg==0.27.0',
         'ply==3.11',
         'python-dateutil==2.8.1',
         'fire==0.4.0',
